@@ -3,1130 +3,1310 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chassis Systems Revision Guide</title>
+    <title>Chassis Systems Interactive Revision</title>
     <style>
+        :root {
+            --primary: #1a4b84;
+            --secondary: #2a7abd;
+            --accent: #f39c12;
+            --correct: #27ae60;
+            --wrong: #e74c3c;
+            --light: #f5f5f5;
+            --dark: #333;
+        }
+        
         * {
             box-sizing: border-box;
-            font-family: Arial, sans-serif;
-        }
-        body {
             margin: 0;
-            padding: 10px;
-            background-color: #f5f5f5;
-            color: #333;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
+        
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
         .container {
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
         }
-        h1 {
-            color: #2c3e50;
+        
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
+        
+        header h1 {
             text-align: center;
-            font-size: 24px;
+            font-size: 2.5rem;
+        }
+        
+        header p {
+            text-align: center;
+            font-size: 1.2rem;
             margin-top: 10px;
         }
-        h2 {
-            color: #3498db;
-            font-size: 20px;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 5px;
-            margin-top: 25px;
+        
+        nav {
+            background-color: var(--secondary);
+            padding: 10px 0;
         }
-        h3 {
-            color: #2c3e50;
-            font-size: 18px;
-        }
-        .section {
-            background: white;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        .instructions {
-            background: #e8f4fc;
-            padding: 10px;
-            border-left: 4px solid #3498db;
-            margin-bottom: 15px;
-        }
-        textarea, input[type="text"] {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
-        }
-        textarea {
-            min-height: 80px;
-            resize: vertical;
-        }
-        .component-item {
-            margin-bottom: 15px;
-        }
-        .key-term {
+        
+        .tabs {
             display: flex;
-            margin-bottom: 10px;
+            justify-content: center;
+            list-style: none;
         }
-        .key-term input:first-child {
-            width: 30%;
-            margin-right: 10px;
-        }
-        .key-term input:last-child {
-            width: 70%;
-        }
-        .mind-map {
-            background: #f9f9f9;
-            border: 1px dashed #ccc;
-            padding: 15px;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-        .mind-map-container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .mind-map-branch {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        .mind-map-category {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        .mind-map-category input {
-            flex-grow: 1;
-        }
-        .mind-map-details {
-            margin-left: 30px;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        .rating {
-            display: flex;
-            justify-content: space-between;
-            margin: 10px 0;
-        }
-        .rating span {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            font-size: 14px;
-        }
-        .add-button {
-            background: #3498db;
+        
+        .tab-link {
             color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            margin: 5px 0;
-        }
-        .remove-button {
-            background: #e74c3c;
-            color: white;
-            border: none;
-            padding: 3px 8px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            margin-left: 5px;
-        }
-        .scenario {
-            background: #f0f0f0;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 4px;
-        }
-        .scenario-title {
+            text-decoration: none;
+            padding: 10px 20px;
+            font-size: 1.1rem;
             font-weight: bold;
-            margin-bottom: 10px;
-        }
-        .cause-item, .procedure-item {
-            display: flex;
-            margin-bottom: 5px;
-        }
-        .cause-item input, .procedure-item input {
-            flex-grow: 1;
-        }
-        hr {
-            border: 0;
-            height: 1px;
-            background: #ddd;
-            margin: 20px 0;
-        }
-        .checkbox-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        .checkbox-item input[type="checkbox"] {
-            margin-right: 10px;
-        }
-        .checkbox-item input[type="text"] {
-            flex-grow: 1;
-        }
-        .tab-container {
-            margin-bottom: 15px;
-        }
-        .tab-buttons {
-            display: flex;
-            overflow-x: auto;
-            border-bottom: 1px solid #ddd;
-        }
-        .tab-button {
-            padding: 10px 15px;
-            background: #f1f1f1;
-            border: none;
             cursor: pointer;
-            font-size: 16px;
-            flex-shrink: 0;
+            border-radius: 5px;
+            margin: 0 5px;
+            transition: background-color 0.3s;
         }
-        .tab-button.active {
-            background: #3498db;
-            color: white;
+        
+        .tab-link:hover, .tab-link.active {
+            background-color: var(--accent);
         }
-        .tab-content {
+        
+        .content-section {
             display: none;
-            padding: 15px;
-            background: #fff;
-            border: 1px solid #ddd;
-            border-top: none;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
         }
-        .tab-content.active {
+        
+        .content-section.active {
             display: block;
         }
-        .notes-container {
+        
+        h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 10px;
+        }
+        
+        h3 {
+            color: var(--secondary);
+            margin: 20px 0 10px;
+        }
+        
+        p {
             margin-bottom: 15px;
         }
-        .save-button {
-            background: #2ecc71;
+        
+        .quiz-container, .drag-drop-container, .flashcard-container, .simulation-container {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        
+        .question {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .question p {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        .options {
+            list-style: none;
+            margin: 10px 0;
+        }
+        
+        .option {
+            padding: 10px;
+            margin: 5px 0;
+            background-color: #eee;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .option:hover {
+            background-color: #ddd;
+        }
+        
+        .option.selected {
+            background-color: var(--secondary);
+            color: white;
+        }
+        
+        .option.correct {
+            background-color: var(--correct);
+            color: white;
+        }
+        
+        .option.wrong {
+            background-color: var(--wrong);
+            color: white;
+        }
+        
+        .feedback {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .feedback.correct {
+            background-color: rgba(39, 174, 96, 0.2);
+            color: var(--correct);
+        }
+        
+        .feedback.wrong {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: var(--wrong);
+        }
+        
+        button {
+            background-color: var(--secondary);
             color: white;
             border: none;
-            padding: 10px 15px;
-            border-radius: 4px;
+            padding: 10px 20px;
+            border-radius: 5px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 1rem;
+            margin-top: 15px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: var(--primary);
+        }
+        
+        .progress-container {
+            margin: 20px 0;
+            background-color: #eee;
+            border-radius: 5px;
+            height: 20px;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background-color: var(--accent);
+            border-radius: 5px;
+            width: 0;
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .diagram-container {
+            position: relative;
             width: 100%;
+            text-align: center;
             margin: 20px 0;
         }
-        .task-timer {
-            background: #34495e;
-            color: white;
-            padding: 10px;
-            text-align: center;
-            border-radius: 4px;
-            margin-bottom: 15px;
+        
+        .diagram-image {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
         }
-        @media (max-width: 600px) {
-            .key-term {
+        
+        .hotspot {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-color: rgba(243, 156, 18, 0.7);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            transition: transform 0.3s, background-color 0.3s;
+        }
+        
+        .hotspot:hover {
+            transform: scale(1.2);
+            background-color: var(--accent);
+        }
+        
+        .info-box {
+            display: none;
+            position: absolute;
+            width: 200px;
+            padding: 10px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+        
+        .drag-item {
+            padding: 10px;
+            margin: 5px;
+            background-color: var(--secondary);
+            color: white;
+            border-radius: 5px;
+            cursor: grab;
+            user-select: none;
+            display: inline-block;
+        }
+        
+        .drop-zone {
+            padding: 15px;
+            margin: 10px 0;
+            min-height: 50px;
+            border: 2px dashed #ddd;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        
+        .drop-zone.highlight {
+            background-color: rgba(42, 122, 189, 0.1);
+            border-color: var(--secondary);
+        }
+        
+        .flashcard {
+            width: 100%;
+            height: 200px;
+            perspective: 1000px;
+            margin: 20px 0;
+        }
+        
+        .flashcard-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+        }
+        
+        .flashcard.flipped .flashcard-inner {
+            transform: rotateY(180deg);
+        }
+        
+        .flashcard-front, .flashcard-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .flashcard-front {
+            background-color: var(--primary);
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .flashcard-back {
+            background-color: white;
+            color: var(--dark);
+            transform: rotateY(180deg);
+            overflow-y: auto;
+        }
+        
+        .flashcard-nav {
+            display: flex;
+            justify-content: center;
+            margin-top: 15px;
+        }
+        
+        .flashcard-nav button {
+            margin: 0 5px;
+        }
+        
+        .simulation-area {
+            width: 100%;
+            height: 400px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            margin: 20px 0;
+            background-color: #f9f9f9;
+        }
+        
+        .car-chassis {
+            position: absolute;
+            width: 300px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .sim-controls {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        
+        footer {
+            background-color: var(--primary);
+            color: white;
+            text-align: center;
+            padding: 20px 0;
+            margin-top: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .tabs {
                 flex-direction: column;
             }
-            .key-term input:first-child, .key-term input:last-child {
-                width: 100%;
-                margin-right: 0;
+            
+            .tab-link {
+                margin: 5px 0;
+            }
+            
+            .info-box {
+                width: 150px;
             }
         }
     </style>
 </head>
 <body>
+    <header>
+        <div class="container">
+            <h1>Vehicle Chassis Systems</h1>
+            <p>Interactive Revision for Level 2 Motor Vehicle Learners</p>
+        </div>
+    </header>
+    
+    <nav>
+        <div class="container">
+            <ul class="tabs">
+                <li><a class="tab-link active" data-tab="intro">Introduction</a></li>
+                <li><a class="tab-link" data-tab="steering">Steering Systems</a></li>
+                <li><a class="tab-link" data-tab="suspension">Suspension Systems</a></li>
+                <li><a class="tab-link" data-tab="brakes">Braking Systems</a></li>
+                <li><a class="tab-link" data-tab="wheels">Wheels & Tyres</a></li>
+                <li><a class="tab-link" data-tab="exam">Mock Exam</a></li>
+            </ul>
+        </div>
+    </nav>
+    
     <div class="container">
-        <h1>Chassis Systems Mastery Guide</h1>
-        <p style="text-align: center;">Interactive Revision Workshop</p>
+        <section id="intro" class="content-section active">
+            <h2>Welcome to Chassis Systems Interactive Revision</h2>
+            <p>This interactive learning tool is designed to help you prepare for your upcoming Unit 154 exam on Light Vehicle Chassis Units and Components.</p>
+            
+            <h3>How to Use This Resource:</h3>
+            <p>Navigate through the tabs above to access different sections of the chassis systems. Each section includes:</p>
+            <ul>
+                <li>Key information and diagrams</li>
+                <li>Interactive quizzes</li>
+                <li>Component identification activities</li>
+                <li>Flashcards for terminology</li>
+                <li>Interactive simulations</li>
+            </ul>
+            
+            <p>Complete the activities in each section to test your knowledge. When you feel ready, take the mock exam to assess your preparation level.</p>
+            
+            <h3>Learning Outcomes:</h3>
+            <p>By the end of this revision session, you should be able to:</p>
+            <ul>
+                <li>Understand how steering and suspension systems operate</li>
+                <li>Understand how braking systems operate</li>
+                <li>Understand how wheel and tyre systems operate</li>
+                <li>Understand how to check, replace and test chassis units and components</li>
+            </ul>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <button id="start-btn">Start Learning</button>
+            </div>
+        </section>
         
-        <div class="task-timer">
-            <h3 style="margin: 0; color: white;">Time Spent</h3>
-            <div id="timer">00:00:00</div>
-        </div>
-
-        <div class="tab-container">
-            <div class="tab-buttons">
-                <button class="tab-button active" onclick="openTab(event, 'intro')">Intro</button>
-                <button class="tab-button" onclick="openTab(event, 'part1')">Part 1</button>
-                <button class="tab-button" onclick="openTab(event, 'part2')">Part 2</button>
-                <button class="tab-button" onclick="openTab(event, 'part3')">Part 3</button>
-                <button class="tab-button" onclick="openTab(event, 'part4')">Part 4</button>
-                <button class="tab-button" onclick="openTab(event, 'assessment')">Self-Assessment</button>
-            </div>
+        <section id="steering" class="content-section">
+            <h2>Steering Systems</h2>
             
-            <div id="intro" class="tab-content active">
-                <h2>Introduction</h2>
-                <div class="instructions">
-                    <p>This interactive workshop will help you create revision materials for the upcoming chassis systems exam. Work through each section to build a comprehensive study guide.</p>
-                    <p>By the end, you'll have materials covering Steering, Suspension, Brakes, and Wheels/Tyres.</p>
-                </div>
-                
-                <h3>Select Your System:</h3>
-                <select id="system-select" style="width: 100%; padding: 10px; margin-bottom: 15px; font-size: 16px;">
-                    <option value="">-- Select your assigned system --</option>
-                    <option value="Steering">Steering</option>
-                    <option value="Suspension">Suspension</option>
-                    <option value="Brakes">Brakes</option>
-                    <option value="Wheels and Tyres">Wheels and Tyres</option>
-                </select>
-                
-                <p>Click on the tabs above to navigate through each part of the workshop.</p>
-                <button onclick="openTab(null, 'part1')" style="background: #3498db; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; width: 100%;">Start Workshop</button>
-            </div>
+            <h3>Key Components and Operation</h3>
+            <p>Steering systems convert the rotational movement of the steering wheel into the angular movement of the road wheels, allowing the driver to control the vehicle's direction.</p>
             
-            <div id="part1" class="tab-content">
-                <h2>Part 1: Knowledge Organization (30 minutes)</h2>
-                <div class="instructions">
-                    <p>Create a mind map for your assigned system. Add components, operation principles, advantages, defects, and inspection procedures.</p>
+            <div class="diagram-container">
+                <img src="/api/placeholder/600/400" alt="Steering System Diagram" class="diagram-image">
+                <div class="hotspot" style="top: 50%; left: 30%;" data-info="rack">1</div>
+                <div class="hotspot" style="top: 30%; left: 60%;" data-info="tierod">2</div>
+                <div class="hotspot" style="top: 40%; left: 45%;" data-info="steering-column">3</div>
+                
+                <div class="info-box" id="rack-info">
+                    <h4>Steering Rack</h4>
+                    <p>Converts rotational motion from the steering column to linear motion, moving the tie rods left and right.</p>
                 </div>
-                
-                <h3>Your System: <span id="selected-system-display">Not Selected</span></h3>
-                
-                <div class="mind-map-container">
-                    <h3>Components</h3>
-                    <div id="components-container">
-                        <div class="mind-map-details">
-                            <input type="text" placeholder="Enter component 1">
-                            <input type="text" placeholder="Enter component 2">
-                            <input type="text" placeholder="Enter component 3">
-                        </div>
-                        <button class="add-button" onclick="addMindMapItem('components-container')">+ Add Component</button>
-                    </div>
-                    
-                    <h3>Operation Principles</h3>
-                    <div id="operation-container">
-                        <div class="mind-map-details">
-                            <input type="text" placeholder="Enter operation principle 1">
-                            <input type="text" placeholder="Enter operation principle 2">
-                            <input type="text" placeholder="Enter operation principle 3">
-                        </div>
-                        <button class="add-button" onclick="addMindMapItem('operation-container')">+ Add Principle</button>
-                    </div>
-                    
-                    <h3>Advantages</h3>
-                    <div id="advantages-container">
-                        <div class="mind-map-details">
-                            <input type="text" placeholder="Enter advantage 1">
-                            <input type="text" placeholder="Enter advantage 2">
-                            <input type="text" placeholder="Enter advantage 3">
-                        </div>
-                        <button class="add-button" onclick="addMindMapItem('advantages-container')">+ Add Advantage</button>
-                    </div>
-                    
-                    <h3>Common Defects</h3>
-                    <div id="defects-container">
-                        <div class="mind-map-details">
-                            <input type="text" placeholder="Enter defect 1">
-                            <input type="text" placeholder="Enter defect 2">
-                            <input type="text" placeholder="Enter defect 3">
-                        </div>
-                        <button class="add-button" onclick="addMindMapItem('defects-container')">+ Add Defect</button>
-                    </div>
-                    
-                    <h3>Inspection Procedures</h3>
-                    <div id="procedures-container">
-                        <div class="mind-map-details">
-                            <input type="text" placeholder="Enter procedure 1">
-                            <input type="text" placeholder="Enter procedure 2">
-                            <input type="text" placeholder="Enter procedure 3">
-                        </div>
-                        <button class="add-button" onclick="addMindMapItem('procedures-container')">+ Add Procedure</button>
-                    </div>
+                <div class="info-box" id="tierod-info">
+                    <h4>Tie Rod</h4>
+                    <p>Connects the steering rack to the steering knuckle, transferring motion to turn the wheels.</p>
                 </div>
-                
-                <div style="display: flex; justify-content: space-between; margin-top: 20px;">
-                    <button onclick="openTab(null, 'intro')" style="background: #95a5a6; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer;">Previous</button>
-                    <button onclick="openTab(null, 'part2')" style="background: #3498db; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer;">Next: Diagnostic Challenges</button>
+                <div class="info-box" id="steering-column-info">
+                    <h4>Steering Column</h4>
+                    <p>Connects the steering wheel to the steering rack or box.</p>
                 </div>
             </div>
             
-            <div id="part2" class="tab-content">
-                <h2>Part 2: Diagnostic Challenges (40 minutes)</h2>
-                <div class="instructions">
-                    <p>Create 3-5 diagnostic scenarios for your assigned system. Include symptoms, possible causes, inspection procedures, and recommended repairs.</p>
+            <h3>Steering Geometry</h3>
+            <p>The following angles and measurements are crucial for proper steering operation:</p>
+            <ul>
+                <li><strong>Castor Angle:</strong> The forward or backward slope of the steering axis when viewed from the side. Positive castor improves straight-line stability.</li>
+                <li><strong>Camber Angle:</strong> The inward or outward tilt of the wheel when viewed from the front. Affects tire wear and handling.</li>
+                <li><strong>Kingpin Inclination:</strong> The inward tilt of the steering axis when viewed from the front. Helps return the steering to center.</li>
+                <li><strong>Toe-in/Toe-out:</strong> The difference in distance between the front and rear of the wheels. Affects straight-line stability and tire wear.</li>
+            </ul>
+            
+            <div class="quiz-container">
+                <h3>Quick Quiz: Steering Systems</h3>
+                
+                <div class="question" id="steering-q1">
+                    <p>1. What effect does positive castor angle have on a vehicle?</p>
+                    <ul class="options">
+                        <li class="option" data-correct="true">Improves straight-line stability</li>
+                        <li class="option">Reduces steering effort</li>
+                        <li class="option">Increases tire wear on inner edges</li>
+                        <li class="option">Causes the vehicle to pull to one side</li>
+                    </ul>
+                    <div class="feedback"></div>
                 </div>
                 
-                <div id="scenarios-container">
-                    <div class="scenario">
-                        <div class="scenario-title">Scenario 1</div>
-                        <div>
-                            <p>Vehicle symptoms:</p>
-                            <textarea placeholder="Describe the symptoms a vehicle might present..."></textarea>
-                            
-                            <p>Possible causes:</p>
-                            <div id="causes-container-1">
-                                <div class="cause-item">
-                                    <input type="text" placeholder="Possible cause 1">
-                                </div>
-                                <div class="cause-item">
-                                    <input type="text" placeholder="Possible cause 2">
-                                </div>
-                                <div class="cause-item">
-                                    <input type="text" placeholder="Possible cause 3">
-                                </div>
-                            </div>
-                            <button class="add-button" onclick="addCauseItem('causes-container-1')">+ Add Cause</button>
-                            
-                            <p>Inspection procedures:</p>
-                            <div id="procedures-container-1">
-                                <div class="procedure-item">
-                                    <input type="text" placeholder="Inspection procedure 1">
-                                </div>
-                                <div class="procedure-item">
-                                    <input type="text" placeholder="Inspection procedure 2">
-                                </div>
-                                <div class="procedure-item">
-                                    <input type="text" placeholder="Inspection procedure 3">
-                                </div>
-                            </div>
-                            <button class="add-button" onclick="addProcedureItem('procedures-container-1')">+ Add Procedure</button>
-                            
-                            <p>Recommended repairs:</p>
-                            <textarea placeholder="Describe the recommended repairs..."></textarea>
+                <div class="question" id="steering-q2">
+                    <p>2. Which steering geometry principle explains why the inside wheel turns at a greater angle than the outside wheel during cornering?</p>
+                    <ul class="options">
+                        <li class="option" data-correct="true">Ackerman principle</li>
+                        <li class="option">Castor principle</li>
+                        <li class="option">Camber principle</li>
+                        <li class="option">Kingpin principle</li>
+                    </ul>
+                    <div class="feedback"></div>
+                </div>
+                
+                <div class="question" id="steering-q3">
+                    <p>3. What is the main advantage of power-assisted steering systems?</p>
+                    <ul class="options">
+                        <li class="option">They eliminate tire wear</li>
+                        <li class="option">They prevent understeer</li>
+                        <li class="option" data-correct="true">They reduce driver effort, especially at low speeds</li>
+                        <li class="option">They improve fuel economy</li>
+                    </ul>
+                    <div class="feedback"></div>
+                </div>
+                
+                <button id="check-steering-quiz">Check Answers</button>
+            </div>
+            
+            <div class="flashcard-container">
+                <h3>Steering Terminology Flashcards</h3>
+                
+                <div class="flashcard" id="flashcard-1">
+                    <div class="flashcard-inner">
+                        <div class="flashcard-front">
+                            <p>Understeer</p>
+                        </div>
+                        <div class="flashcard-back">
+                            <p>A handling condition where the vehicle tends to continue straight ahead when cornering, with the front tires losing grip before the rear tires. The car "pushes" toward the outside of the turn.</p>
                         </div>
                     </div>
                 </div>
-                <button class="add-button" onclick="addScenario()">+ Add New Scenario</button>
                 
-                <div style="display: flex; justify-content: space-between; margin-top: 20px;">
-                    <button onclick="openTab(null, 'part1')" style="background: #95a5a6; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer;">Previous</button>
-                    <button onclick="openTab(null, 'part3')" style="background: #3498db; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer;">Next: Visual Reference Guide</button>
+                <div class="flashcard-nav">
+                    <button id="prev-card">Previous</button>
+                    <button id="flip-card">Flip Card</button>
+                    <button id="next-card">Next</button>
                 </div>
+            </div>
+        </section>
+        
+        <section id="suspension" class="content-section">
+            <h2>Suspension Systems</h2>
+            
+            <h3>Types of Suspension Systems</h3>
+            <p>Suspension systems are designed to support the vehicle weight, absorb road shocks, and maintain tire contact with the road.</p>
+            
+            <h4>Independent Front Suspension (IFS)</h4>
+            <p>Allows each wheel to move independently, providing better ride quality and handling. Common types include:</p>
+            <ul>
+                <li><strong>MacPherson Strut:</strong> Combines the spring, damper, and upper control arm into one unit.</li>
+                <li><strong>Double Wishbone:</strong> Uses two control arms (wishbones) to allow vertical wheel movement with minimal change to camber angle.</li>
+            </ul>
+            
+            <h4>Rigid Axle Suspension</h4>
+            <p>A solid beam connects the left and right wheels, causing movement of one wheel to affect the other. Often used on rear suspensions of trucks and some rear-wheel-drive vehicles.</p>
+            
+            <div class="diagram-container">
+                <img src="/api/placeholder/600/400" alt="Suspension Systems" class="diagram-image">
             </div>
             
-            <div id="part3" class="tab-content">
-                <h2>Part 3: Visual Reference Guide (30 minutes)</h2>
-                <div class="instructions">
-                    <p>Create a quick reference guide for your assigned system including key components, common defects, terminology, and an inspection checklist.</p>
+            <h3>Suspension Components</h3>
+            <div class="drag-drop-container">
+                <h4>Match the Components to Their Functions</h4>
+                
+                <div class="drag-items">
+                    <div class="drag-item" draggable="true" data-component="shock-absorber">Shock Absorber</div>
+                    <div class="drag-item" draggable="true" data-component="coil-spring">Coil Spring</div>
+                    <div class="drag-item" draggable="true" data-component="anti-roll-bar">Anti-Roll Bar</div>
+                    <div class="drag-item" draggable="true" data-component="ball-joint">Ball Joint</div>
+                    <div class="drag-item" draggable="true" data-component="control-arm">Control Arm</div>
                 </div>
                 
-                <h3>Key Components</h3>
-                <div id="key-components-container">
-                    <div class="component-item">
-                        <input type="text" placeholder="Component 1 and brief description">
+                <div class="drop-zones">
+                    <div class="drop-zone" data-target="shock-absorber">
+                        <p>Dampens spring oscillations, controls excessive bounce and rebound</p>
                     </div>
-                    <div class="component-item">
-                        <input type="text" placeholder="Component 2 and brief description">
+                    <div class="drop-zone" data-target="coil-spring">
+                        <p>Supports vehicle weight and absorbs road shocks</p>
                     </div>
-                    <div class="component-item">
-                        <input type="text" placeholder="Component 3 and brief description">
+                    <div class="drop-zone" data-target="anti-roll-bar">
+                        <p>Reduces body roll during cornering</p>
                     </div>
-                    <div class="component-item">
-                        <input type="text" placeholder="Component 4 and brief description">
+                    <div class="drop-zone" data-target="ball-joint">
+                        <p>Allows pivoting movement between suspension components</p>
                     </div>
-                    <div class="component-item">
-                        <input type="text" placeholder="Component 5 and brief description">
-                    </div>
-                </div>
-                <button class="add-button" onclick="addComponent()">+ Add Component</button>
-                
-                <h3>Component Diagram Notes</h3>
-                <textarea placeholder="Describe your diagram here, noting key parts and their relationships..."></textarea>
-                
-                <h3>Common Defects</h3>
-                <div id="defects-list-container">
-                    <div class="key-term">
-                        <input type="text" placeholder="Symptom">
-                        <input type="text" placeholder="Likely Cause">
-                    </div>
-                    <div class="key-term">
-                        <input type="text" placeholder="Symptom">
-                        <input type="text" placeholder="Likely Cause">
-                    </div>
-                    <div class="key-term">
-                        <input type="text" placeholder="Symptom">
-                        <input type="text" placeholder="Likely Cause">
-                    </div>
-                    <div class="key-term">
-                        <input type="text" placeholder="Symptom">
-                        <input type="text" placeholder="Likely Cause">
+                    <div class="drop-zone" data-target="control-arm">
+                        <p>Links the chassis to the knuckle and controls wheel movement</p>
                     </div>
                 </div>
-                <button class="add-button" onclick="addDefect()">+ Add Defect</button>
                 
-                <h3>Key Terminology</h3>
-                <div id="terminology-container">
-                    <div class="key-term">
-                        <input type="text" placeholder="Term">
-                        <input type="text" placeholder="Definition">
-                    </div>
-                    <div class="key-term">
-                        <input type="text" placeholder="Term">
-                        <input type="text" placeholder="Definition">
-                    </div>
-                    <div class="key-term">
-                        <input type="text" placeholder="Term">
-                        <input type="text" placeholder="Definition">
-                    </div>
-                    <div class="key-term">
-                        <input type="text" placeholder="Term">
-                        <input type="text" placeholder="Definition">
-                    </div>
-                    <div class="key-term">
-                        <input type="text" placeholder="Term">
-                        <input type="text" placeholder="Definition">
-                    </div>
-                </div>
-                <button class="add-button" onclick="addTerm()">+ Add Term</button>
-                
-                <h3>Inspection Checklist</h3>
-                <div id="checklist-container">
-                    <div class="checkbox-item">
-                        <input type="checkbox">
-                        <input type="text" placeholder="Inspection item 1">
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox">
-                        <input type="text" placeholder="Inspection item 2">
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox">
-                        <input type="text" placeholder="Inspection item 3">
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox">
-                        <input type="text" placeholder="Inspection item 4">
-                    </div>
-                    <div class="checkbox-item">
-                        <input type="checkbox">
-                        <input type="text" placeholder="Inspection item 5">
-                    </div>
-                </div>
-                <button class="add-button" onclick="addChecklistItem()">+ Add Checklist Item</button>
-                
-                <div style="display: flex; justify-content: space-between; margin-top: 20px;">
-                    <button onclick="openTab(null, 'part2')" style="background: #95a5a6; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer;">Previous</button>
-                    <button onclick="openTab(null, 'part4')" style="background: #3498db; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer;">Next: Knowledge Sharing</button>
-                </div>
+                <button id="check-drag-drop">Check Answers</button>
             </div>
             
-            <div id="part4" class="tab-content">
-                <h2>Part 4: Knowledge Sharing (20 minutes)</h2>
-                <div class="instructions">
-                    <p>Prepare to share the 3 most important points about your system. As others present, take notes in the spaces below.</p>
+            <div class="quiz-container">
+                <h3>Quick Quiz: Suspension Systems</h3>
+                
+                <div class="question" id="suspension-q1">
+                    <p>1. What suspension movement term describes when the front of the vehicle drops during heavy braking?</p>
+                    <ul class="options">
+                        <li class="option">Roll</li>
+                        <li class="option" data-correct="true">Dive</li>
+                        <li class="option">Pitch</li>
+                        <li class="option">Bounce</li>
+                    </ul>
+                    <div class="feedback"></div>
                 </div>
                 
-                <h3>Your Key Points to Share</h3>
-                <div>
-                    <input type="text" placeholder="Key point 1">
-                    <input type="text" placeholder="Key point 2">
-                    <input type="text" placeholder="Key point 3">
+                <div class="question" id="suspension-q2">
+                    <p>2. Which of these is NOT a type of independent suspension?</p>
+                    <ul class="options">
+                        <li class="option">MacPherson strut</li>
+                        <li class="option">Double wishbone</li>
+                        <li class="option" data-correct="true">Leaf spring with solid axle</li>
+                        <li class="option">Multi-link</li>
+                    </ul>
+                    <div class="feedback"></div>
                 </div>
                 
-                <h3>Notes from Other Presentations</h3>
-                <div class="notes-container">
-                    <h4>Steering System</h4>
-                    <textarea placeholder="Note key points from the Steering presentation..."></textarea>
-                    
-                    <h4>Suspension System</h4>
-                    <textarea placeholder="Note key points from the Suspension presentation..."></textarea>
-                    
-                    <h4>Braking System</h4>
-                    <textarea placeholder="Note key points from the Brakes presentation..."></textarea>
-                    
-                    <h4>Wheels and Tyres</h4>
-                    <textarea placeholder="Note key points from the Wheels and Tyres presentation..."></textarea>
-                </div>
-                
-                <div style="display: flex; justify-content: space-between; margin-top: 20px;">
-                    <button onclick="openTab(null, 'part3')" style="background: #95a5a6; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer;">Previous</button>
-                    <button onclick="openTab(null, 'assessment')" style="background: #3498db; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer;">Next: Self-Assessment</button>
-                </div>
+                <button id="check-suspension-quiz">Check Answers</button>
+            </div>
+        </section>
+        
+        <section id="brakes" class="content-section">
+            <h2>Braking Systems</h2>
+            
+            <h3>Types of Brakes</h3>
+            
+            <h4>Disc Brakes</h4>
+            <p>Consist of a brake disc (rotor) attached to the wheel hub, and a caliper containing brake pads that press against the disc to create friction.</p>
+            <ul>
+                <li>Better heat dissipation</li>
+                <li>More consistent braking performance</li>
+                <li>Self-adjusting</li>
+                <li>More effective in wet conditions</li>
+            </ul>
+            
+            <h4>Drum Brakes</h4>
+            <p>Consist of a drum attached to the wheel hub, with brake shoes inside that press outward against the drum to create friction.</p>
+            <ul>
+                <li>Lower cost</li>
+                <li>Effective parking brake function</li>
+                <li>Protected from external elements</li>
+                <li>Less effective cooling than disc brakes</li>
+            </ul>
+            
+            <div class="diagram-container">
+                <img src="/api/placeholder/600/400" alt="Braking Systems" class="diagram-image">
             </div>
             
-            <div id="assessment" class="tab-content">
-                <h2>Self-Assessment</h2>
-                <div class="instructions">
-                    <p>Rate your confidence in each system and identify your revision priorities.</p>
+            <h3>Hydraulic System Components</h3>
+            <ul>
+                <li><strong>Master Cylinder:</strong> Converts pedal force into hydraulic pressure</li>
+                <li><strong>Brake Lines and Hoses:</strong> Transport hydraulic fluid to the wheels</li>
+                <li><strong>Wheel Cylinders/Calipers:</strong> Convert hydraulic pressure into mechanical force</li>
+                <li><strong>Brake Fluid:</strong> Incompressible fluid that transfers force</li>
+                <li><strong>Brake Servo:</strong> Amplifies pedal force for reduced effort</li>
+            </ul>
+            
+            <h3>Electronic Braking Systems</h3>
+            <p>Modern vehicles are equipped with electronic systems to enhance braking performance:</p>
+            <ul>
+                <li><strong>ABS (Anti-lock Braking System):</strong> Prevents wheel lock-up during braking</li>
+                <li><strong>EBD (Electronic Brake Distribution):</strong> Optimizes brake force distribution</li>
+                <li><strong>TCS (Traction Control System):</strong> Prevents wheel spin during acceleration</li>
+                <li><strong>ESC (Electronic Stability Control):</strong> Helps maintain vehicle control during cornering</li>
+            </ul>
+            
+            <div class="quiz-container">
+                <h3>Quick Quiz: Braking Systems</h3>
+                
+                <div class="question" id="brakes-q1">
+                    <p>1. Which property of brake fluid is critical for its function in high-temperature conditions?</p>
+                    <ul class="options">
+                        <li class="option" data-correct="true">High boiling point</li>
+                        <li class="option">Low viscosity</li>
+                        <li class="option">Acidic pH</li>
+                        <li class="option">Low density</li>
+                    </ul>
+                    <div class="feedback"></div>
                 </div>
                 
-                <h3>Confidence Rating (1-5, with 5 being most confident)</h3>
-                
-                <div class="rating">
-                    <span>Steering<br>
-                        <select style="margin-top: 5px;">
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="5">5</option>
-                        </select>
-                    </span>
-                    <span>Suspension<br>
-                        <select style="margin-top: 5px;">
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="5">5</option>
-                        </select>
-                    </span>
-                    <span>Brakes<br>
-                        <select style="margin-top: 5px;">
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="5">5</option>
-                        </select>
-                    </span>
-                    <span>Wheels & Tyres<br>
-                        <select style="margin-top: 5px;">
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="5">5</option>
-                        </select>
-                    </span>
+                <div class="question" id="brakes-q2">
+                    <p>2. What is the main purpose of the ABS (Anti-lock Braking System)?</p>
+                    <ul class="options">
+                        <li class="option">To increase braking power</li>
+                        <li class="option">To reduce brake pad wear</li>
+                        <li class="option" data-correct="true">To prevent wheel lock-up during braking</li>
+                        <li class="option">To automatically apply brakes in emergency situations</li>
+                    </ul>
+                    <div class="feedback"></div>
                 </div>
                 
-                <h3>My Exam Revision Priorities</h3>
-                <div id="priorities-container">
-                    <input type="text" placeholder="Priority 1">
-                    <input type="text" placeholder="Priority 2">
-                    <input type="text" placeholder="Priority 3">
-                </div>
-                <button class="add-button" onclick="addPriority()">+ Add Priority</button>
-                
-                <h3>Additional Notes</h3>
-                <textarea placeholder="Any other notes about what you need to focus on..."></textarea>
-                
-                <h3>Instructor Contact</h3>
-                <div style="margin-bottom: 20px;">
-                    <label for="instructor-email">Instructor's Email Address:</label>
-                    <input type="email" id="instructor-email" placeholder="Enter your instructor's email" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px;">
+                <div class="question" id="brakes-q3">
+                    <p>3. Which term refers to a reduction in braking effectiveness due to excessive heat?</p>
+                    <ul class="options">
+                        <li class="option">Brake drag</li>
+                        <li class="option" data-correct="true">Brake fade</li>
+                        <li class="option">Brake judder</li>
+                        <li class="option">Brake bias</li>
+                    </ul>
+                    <div class="feedback"></div>
                 </div>
                 
-                <div style="display: flex; gap: 10px; margin-top: 20px;">
-                    <button class="save-button" onclick="saveWorksheet()">Save My Revision Guide</button>
-                    <button class="save-button" onclick="downloadSummary()" style="background: #2980b9;">Download Summary</button>
-                    <button class="save-button" onclick="emailToInstructor()" style="background: #27ae60;">Email to Instructor</button>
+                <button id="check-brakes-quiz">Check Answers</button>
+            </div>
+            
+            <div class="simulation-container">
+                <h3>Brake System Troubleshooting Simulation</h3>
+                <p>Identify the potential cause of each brake problem:</p>
+                
+                <div class="question" id="sim-q1">
+                    <p>Vehicle pulls to one side during braking</p>
+                    <ul class="options">
+                        <li class="option" data-correct="true">Uneven brake pad wear or contaminated brake surfaces</li>
+                        <li class="option">Low brake fluid level</li>
+                        <li class="option">Worn brake disc</li>
+                        <li class="option">Faulty brake servo</li>
+                    </ul>
+                    <div class="feedback"></div>
                 </div>
                 
-                <div style="display: flex; justify-content: flex-start; margin-top: 20px;">
-                    <button onclick="openTab(null, 'part4')" style="background: #95a5a6; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer;">Previous</button>
+                <div class="question" id="sim-q2">
+                    <p>Spongy brake pedal feel</p>
+                    <ul class="options">
+                        <li class="option">Worn brake pads</li>
+                        <li class="option" data-correct="true">Air in the hydraulic system</li>
+                        <li class="option">Warped brake disc</li>
+                        <li class="option">Faulty brake light switch</li>
+                    </ul>
+                    <div class="feedback"></div>
+                </div>
+                
+                <button id="check-brake-sim">Check Diagnosis</button>
+            </div>
+        </section>
+        
+        <section id="wheels" class="content-section">
+            <h2>Wheels & Tyres</h2>
+            
+            <h3>Tyre Construction and Markings</h3>
+            <p>Tyres are designed to provide grip, cushion road impacts, and transmit driving and braking forces to the road surface.</p>
+            
+            <h4>Tyre Types:</h4>
+            <ul>
+                <li><strong>Radial:</strong> Cords run at 90° to the direction of travel. Better handling, longer life.</li>
+                <li><strong>Cross-ply:</strong> Cords run diagonally across the tyre. More robust for rough conditions.</li>
+                <li><strong>Bias-belted:</strong> Cross-ply construction with additional stabilizing belts.</li>
+            </ul>
+            
+            <div class="diagram-container">
+                <img src="/api/placeholder/600/300" alt="Tyre Markings" class="diagram-image">
+            </div>
+            
+            <h4>Understanding Tyre Markings:</h4>
+            <p>Example: 205/55 R16 91V</p>
+            <ul>
+                <li><strong>205:</strong> Tyre width in mm</li>
+                <li><strong>55:</strong> Aspect ratio (height as percentage of width)</li>
+                <li><strong>R:</strong> Radial construction</li>
+                <li><strong>16:</strong> Rim diameter in inches</li>
+                <li><strong>91:</strong> Load index (maximum weight capacity)</li>
+                <li><strong>V:</strong> Speed rating (maximum speed)</li>
+            </ul>
+            
+            <h3>Wheel Construction</h3>
+            <p>Wheels are designed to support the tyre, transmit driving and braking forces, and dissipate heat from the brakes.</p>
+            
+            <h4>Types of Wheels:</h4>
+            <ul>
+                <li><strong>Steel Wheels:</strong> Durable, inexpensive, easily repaired</li>
+                <li><strong>Alloy Wheels:</strong> Lighter, better heat dissipation, improved appearance</li>
+                <li><strong>Wire Wheels:</strong> Classic design, lightweight (historical significance)</li>
+            </ul>
+            
+            <div class="quiz-container">
+                <h3>Quick Quiz: Wheels & Tyres</h3>
+                
+                <div class="question" id="wheels-q1">
+                    <p>1. What does the speed rating 'V' indicate on a tyre?</p>
+                    <ul class="options">
+                        <li class="option">Up to 149 km/h</li>
+                        <li class="option">Up to 180 km/h</li>
+                        <li class="option">Up to 210 km/h</li>
+                        <li class="option" data-correct="true">Up to 240 km/h</li>
+                    </ul>
+                    <div class="feedback"></div>
+                </div>
+                
+                <div class="question" id="wheels-q2">
+                    <p>2. Which tyre wear pattern indicates incorrect toe alignment?</p>
+                    <ul class="options">
+                        <li class="option">Center wear</li>
+                        <li class="option" data-correct="true">Wear on one edge</li>
+                        <li class="option">Cupping or scalloping</li>
+                        <li class="option">Diagonal wear across the tread</li>
+                    </ul>
+                    <div class="feedback"></div>
+                </div>
+                
+                <div class="question" id="wheels-q3">
+                    <p>3. What is the main advantage of alloy wheels over steel wheels?</p>
+                    <ul class="options">
+                        <li class="option">Lower cost</li>
+                        <li class="option">Greater strength</li>
+                        <li class="option" data-correct="true">Reduced unsprung weight and better heat dissipation</li>
+                        <li class="option">Easier to repair</li>
+                    </ul>
+                    <div class="feedback"></div>
+                </div>
+                
+                <button id="check-wheels-quiz">Check Answers</button>
+            </div>
+            
+            <div class="flashcard-container">
+                <h3>Wheel & Tyre Terminology Flashcards</h3>
+                
+                <div class="flashcard" id="tyre-flashcard-1">
+                    <div class="flashcard-inner">
+                        <div class="flashcard-front">
+                            <p>Unsprung Weight</p>
+                        </div>
+                        <div class="flashcard-back">
+                            <p>The weight of components not supported by the suspension (wheels, tyres, brake assemblies). Lower unsprung weight improves ride quality and handling by allowing the suspension to respond more quickly to road irregularities.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flashcard-nav">
+                    <button id="tyre-prev-card">Previous</button>
+                    <button id="tyre-flip-card">Flip Card</button>
+                    <button id="tyre-next-card">Next</button>
                 </div>
             </div>
-        </div>
+        </section>
+        
+        <section id="exam" class="content-section">
+            <h2>Mock Exam</h2>
+            <p>Test your knowledge with this 10-question multiple-choice quiz covering all aspects of chassis systems.</p>
+            
+            <div class="progress-container">
+                <div class="progress-bar" id="exam-progress">0%</div>
+            </div>
+            
+            <div class="quiz-container" id="mock-exam">
+                <div class="question" id="exam-q1">
+                    <p>1. What is the main purpose of a suspension system?</p>
+                    <ul class="options">
+                        <li class="option">To reduce fuel consumption</li>
+                        <li class="option" data-correct="true">To maintain tire contact with the road and absorb road shocks</li>
+                        <li class="option">To provide steering control only</li>
+                        <li class="option">To reduce vehicle weight</li>
+                    </ul>
+                    <div class="feedback"></div>
+                </div>
+                
+                <div class="question" id="exam-q2">
+                    <p>2. Which of these is a component of a disc brake system?</p>
+                    <ul class="options">
+                        <li class="option">Brake shoe</li>
+                        <li class="option">Wheel cylinder</li>
+                        <li class="option" data-correct="true">Caliper</li>
+                        <li class="option">Adjuster</li>
+                    </ul>
+                    <div class="feedback"></div>
+                </div>
+                
+                <div class="question" id="exam-q3">
+                    <p>3. What does the term 'self-servo action' refer to in drum brakes?</p>
+                    <ul class="options">
+                        <li class="option">The automatic adjustment system</li>
+                        <li class="option" data-correct="true">The effect where the drum rotation helps pull the brake shoe into contact</li>
+                        <li class="option">The brake servo that assists pedal pressure</li>
+                        <li class="option">The anti-lock braking feature</li>
+                    </ul>
+                    <div class="feedback"></div>
+                </div>
+                
+                <div class="question" id="exam-q4">
+                    <p>4. Which of these steering geometry angles affects the wheel's tendency to return to center?</p>
+                    <ul class="options">
+                        <li class="option" data-correct="true">Castor angle</li>
+                        <li class="option">Camber angle</li>
+                        <li class="option">Toe angle</li>
+                        <li class="option">Included angle</li>
+                    </ul>
+                    <div class="feedback"></div>
+                </div>
+                
+                <div class="question" id="exam-q5">
+                    <p>5. What component connects the steering rack to the steering knuckle?</p>
+                    <ul class="options">
+                        <li class="option">Idler arm</li>
+                        <li class="option" data-correct="true">Tie rod</li>
+                        <li class="option">Pitman arm</li>
+                        <li class="option">Control arm</li>
+                    </ul>
+                    <div class="feedback"></div>
+                </div>
+                
+                <div class="question" id="exam-q6">
+                    <p>6. Which of these properties is NOT important for brake fluid?</p>
+                    <ul class="options">
+                        <li class="option">High boiling point</li>
+                        <li class="option">Non-corrosive to brake components</li>
+                        <li class="option">Low compressibility</li>
+                        <li class="option" data-correct="true">High electrical conductivity</li>
+                    </ul>
+                    <div class="feedback"></div>
+                </div>
+                
+                <div class="question" id="exam-q7">
+                    <p>7. What is the term for excessive tire wear on both outer edges with the center relatively unworn?</p>
+                    <ul class="options">
+                        <li class="option" data-correct="true">Underinflation</li>
+                        <li class="option">Overinflation</li>
+                        <li class="option">Toe wear</li>
+                        <li class="option">Camber wear</li>
+                    </ul>
+                    <div class="feedback"></div>
+                </div>
+                
+                <div class="question" id="exam-q8">
+                    <p>8. What is the primary function of shock absorbers in a suspension system?</p>
+                    <ul class="options">
+                        <li class="option">To support the vehicle weight</li>
+                        <li class="option" data-correct="true">To control spring oscillations and dampen bounce</li>
+                        <li class="option">To prevent body roll during cornering</li>
+                        <li class="option">To maintain wheel alignment</li>
+                    </ul>
+                    <div class="feedback"></div>
+                </div>
+                
+                <div class="question" id="exam-q9">
+                    <p>9. Which safety precaution is specifically important when working on hybrid/electric vehicle chassis components?</p>
+                    <ul class="options">
+                        <li class="option">Using non-silicone-based lubricants</li>
+                        <li class="option">Ensuring the vehicle is in park</li>
+                        <li class="option" data-correct="true">Ensuring high-voltage systems are isolated</li>
+                        <li class="option">Using nitrogen-filled tires</li>
+                    </ul>
+                    <div class="feedback"></div>
+                </div>
+                
+                <div class="question" id="exam-q10">
+                    <p>10. What is the purpose of a load-sensing valve in a braking system?</p>
+                    <ul class="options">
+                        <li class="option">To prevent wheel lock-up</li>
+                        <li class="option" data-correct="true">To adjust brake force based on vehicle load</li>
+                        <li class="option">To boost pedal pressure</li>
+                        <li class="option">To maintain brake fluid pressure</li>
+                    </ul>
+                    <div class="feedback"></div>
+                </div>
+                
+                <button id="check-exam">Submit Exam</button>
+                <div id="exam-result" style="margin-top: 20px; display: none;"></div>
+            </div>
+        </section>
     </div>
-
+    
+    <footer>
+        <div class="container">
+            <p>© 2025 Vehicle Chassis Interactive Learning</p>
+            <p>Good luck with your exam!</p>
+        </div>
+    </footer>
+    
     <script>
-        // System selection
-        document.getElementById('system-select').addEventListener('change', function() {
-            const selectedSystem = this.value;
-            const displays = document.querySelectorAll('#selected-system-display');
-            displays.forEach(display => {
-                display.textContent = selectedSystem;
+        // Tab Navigation
+        const tabLinks = document.querySelectorAll('.tab-link');
+        const contentSections = document.querySelectorAll('.content-section');
+        
+        tabLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                const tabId = link.getAttribute('data-tab');
+                
+                // Remove active class from all tabs and sections
+                tabLinks.forEach(tab => tab.classList.remove('active'));
+                contentSections.forEach(section => section.classList.remove('active'));
+                
+                // Add active class to clicked tab and corresponding section
+                link.classList.add('active');
+                document.getElementById(tabId).classList.add('active');
             });
         });
         
-        // Tab navigation
-        function openTab(evt, tabName) {
-            const tabContents = document.getElementsByClassName("tab-content");
-            for (let i = 0; i < tabContents.length; i++) {
-                tabContents[i].classList.remove("active");
-            }
+        // Start button
+        document.getElementById('start-btn').addEventListener('click', () => {
+            document.querySelector('.tab-link[data-tab="steering"]').click();
+        });
+        
+        // Hotspot functionality
+        const hotspots = document.querySelectorAll('.hotspot');
+        
+        hotspots.forEach(hotspot => {
+            const infoType = hotspot.getAttribute('data-info');
+            const infoBox = document.getElementById(`${infoType}-info`);
             
-            const tabButtons = document.getElementsByClassName("tab-button");
-            for (let i = 0; i < tabButtons.length; i++) {
-                tabButtons[i].classList.remove("active");
-            }
+            hotspot.addEventListener('mouseenter', () => {
+                // Position info box near hotspot
+                const hotspotRect = hotspot.getBoundingClientRect();
+                const containerRect = hotspot.parentElement.getBoundingClientRect();
+                
+                infoBox.style.left = `${hotspotRect.left - containerRect.left + 30}px`;
+                infoBox.style.top = `${hotspotRect.top - containerRect.top}px`;
+                infoBox.style.display = 'block';
+            });
             
-            document.getElementById(tabName).classList.add("active");
+            hotspot.addEventListener('mouseleave', () => {
+                infoBox.style.display = 'none';
+            });
+        });
+        
+        // Quiz functionality
+        const quizButtons = document.querySelectorAll('#check-steering-quiz, #check-suspension-quiz, #check-brakes-quiz, #check-wheels-quiz, #check-brake-sim');
+        
+        quizButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const quizContainer = button.closest('.quiz-container');
+                const questions = quizContainer.querySelectorAll('.question');
+                let score = 0;
+                
+                questions.forEach(question => {
+                    const selectedOption = question.querySelector('.option.selected');
+                    const feedback = question.querySelector('.feedback');
+                    
+                    if (selectedOption) {
+                        if (selectedOption.hasAttribute('data-correct')) {
+                            selectedOption.classList.add('correct');
+                            feedback.textContent = 'Correct!';
+                            feedback.classList.add('correct');
+                            feedback.classList.remove('wrong');
+                            score++;
+                        } else {
+                            selectedOption.classList.add('wrong');
+                            const correctOption = question.querySelector('.option[data-correct="true"]');
+                            correctOption.classList.add('correct');
+                            feedback.textContent = 'Incorrect. The correct answer is highlighted.';
+                            feedback.classList.add('wrong');
+                            feedback.classList.remove('correct');
+                        }
+                        feedback.style.display = 'block';
+                    }
+                });
+                
+                // Show score if not already displayed
+                if (!quizContainer.querySelector('.score-display')) {
+                    const scoreDisplay = document.createElement('div');
+                    scoreDisplay.classList.add('score-display');
+                    scoreDisplay.style.marginTop = '20px';
+                    scoreDisplay.style.padding = '10px';
+                    scoreDisplay.style.backgroundColor = '#f0f0f0';
+                    scoreDisplay.style.borderRadius = '5px';
+                    scoreDisplay.style.textAlign = 'center';
+                    scoreDisplay.innerHTML = `<strong>Your score: ${score}/${questions.length}</strong>`;
+                    button.insertAdjacentElement('afterend', scoreDisplay);
+                }
+            });
+        });
+        
+        // Option selection
+        document.querySelectorAll('.option').forEach(option => {
+            option.addEventListener('click', () => {
+                const allOptions = option.parentElement.querySelectorAll('.option');
+                allOptions.forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+            });
+        });
+        
+        // Drag and Drop functionality
+        const dragItems = document.querySelectorAll('.drag-item');
+        const dropZones = document.querySelectorAll('.drop-zone');
+        
+        dragItems.forEach(item => {
+            item.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', item.getAttribute('data-component'));
+                setTimeout(() => {
+                    item.classList.add('dragging');
+                }, 0);
+            });
             
-            if (evt) {
-                evt.currentTarget.classList.add("active");
+            item.addEventListener('dragend', () => {
+                item.classList.remove('dragging');
+            });
+        });
+        
+        dropZones.forEach(zone => {
+            zone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                zone.classList.add('highlight');
+            });
+            
+            zone.addEventListener('dragleave', () => {
+                zone.classList.remove('highlight');
+            });
+            
+            zone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                zone.classList.remove('highlight');
+                
+                const componentId = e.dataTransfer.getData('text/plain');
+                const draggedItem = document.querySelector(`.drag-item[data-component="${componentId}"]`);
+                
+                // Check if this is the correct drop zone
+                if (zone.getAttribute('data-target') === componentId) {
+                    zone.innerHTML = `<p>${zone.querySelector('p').textContent}</p>`;
+                    zone.appendChild(draggedItem.cloneNode(true));
+                    zone.style.borderColor = 'green';
+                    draggedItem.style.display = 'none';
+                } else {
+                    zone.style.borderColor = 'red';
+                    setTimeout(() => {
+                        zone.style.borderColor = '#ddd';
+                    }, 1000);
+                }
+            });
+        });
+        
+        document.getElementById('check-drag-drop').addEventListener('click', () => {
+            let correct = 0;
+            const total = dropZones.length;
+            
+            dropZones.forEach(zone => {
+                const targetComponent = zone.getAttribute('data-target');
+                const droppedItem = zone.querySelector(`.drag-item[data-component="${targetComponent}"]`);
+                
+                if (droppedItem) {
+                    correct++;
+                    zone.style.backgroundColor = 'rgba(39, 174, 96, 0.1)';
+                } else {
+                    zone.style.backgroundColor = 'rgba(231, 76, 60, 0.1)';
+                }
+            });
+            
+            // Show score
+            const scoreDisplay = document.createElement('div');
+            scoreDisplay.style.marginTop = '20px';
+            scoreDisplay.style.padding = '10px';
+            scoreDisplay.style.backgroundColor = '#f0f0f0';
+            scoreDisplay.style.borderRadius = '5px';
+            scoreDisplay.style.textAlign = 'center';
+            scoreDisplay.innerHTML = `<strong>Your score: ${correct}/${total}</strong>`;
+            
+            // Replace existing score display or add new one
+            const existingScore = document.querySelector('.drag-drop-score');
+            if (existingScore) {
+                existingScore.replaceWith(scoreDisplay);
             } else {
-                // Find the button for this tab and activate it
-                const buttons = document.getElementsByClassName("tab-button");
-                for (let i = 0; i < buttons.length; i++) {
-                    if (buttons[i].textContent.toLowerCase().includes(tabName.replace("part", "part "))) {
-                        buttons[i].classList.add("active");
-                        break;
+                document.getElementById('check-drag-drop').insertAdjacentElement('afterend', scoreDisplay);
+            }
+            
+            scoreDisplay.classList.add('drag-drop-score');
+        });
+        
+        // Flashcard functionality
+        const flashcards = document.querySelectorAll('.flashcard');
+        const steeringTerms = [
+            {
+                term: 'Understeer',
+                definition: 'A handling condition where the vehicle tends to continue straight ahead when cornering, with the front tires losing grip before the rear tires. The car "pushes" toward the outside of the turn.'
+            },
+            {
+                term: 'Oversteer',
+                definition: 'A handling condition where the rear of the vehicle tends to slide out during cornering, with the rear tires losing grip before the front tires. The car turns more sharply than intended.'
+            },
+            {
+                term: 'Ackerman Principle',
+                definition: 'Steering geometry design that causes the inside wheel to turn at a greater angle than the outside wheel during cornering, allowing both wheels to follow their correct turning radius.'
+            },
+            {
+                term: 'Self-Aligning Torque',
+                definition: 'The tendency of the steering to return to the straight-ahead position after a turn, due to castor angle and tire design.'
+            }
+        ];
+        
+        const tyreTerms = [
+            {
+                term: 'Unsprung Weight',
+                definition: 'The weight of components not supported by the suspension (wheels, tyres, brake assemblies). Lower unsprung weight improves ride quality and handling by allowing the suspension to respond more quickly to road irregularities.'
+            },
+            {
+                term: 'Dynamic Balance',
+                definition: 'The distribution of weight around a wheel and tire assembly when it is rotating. Proper dynamic balance prevents vibration at higher speeds.'
+            },
+            {
+                term: 'Static Balance',
+                definition: 'The even distribution of weight around a wheel and tire assembly when it is stationary. Proper static balance prevents the wheel from having a heavy spot.'
+            },
+            {
+                term: 'Aspect Ratio',
+                definition: 'The ratio of a tire\'s height to its width, expressed as a percentage. A lower aspect ratio indicates a shorter sidewall, typically providing better handling but a firmer ride.'
+            }
+        ];
+        
+        let currentSteeringCard = 0;
+        let currentTyreCard = 0;
+        
+        function updateFlashcard(type) {
+            const flashcard = document.getElementById(type === 'steering' ? 'flashcard-1' : 'tyre-flashcard-1');
+            const front = flashcard.querySelector('.flashcard-front p');
+            const back = flashcard.querySelector('.flashcard-back p');
+            
+            const terms = type === 'steering' ? steeringTerms : tyreTerms;
+            const currentIndex = type === 'steering' ? currentSteeringCard : currentTyreCard;
+            
+            front.textContent = terms[currentIndex].term;
+            back.textContent = terms[currentIndex].definition;
+            
+            // Reset flip if needed
+            flashcard.classList.remove('flipped');
+        }
+        
+        // Initial flashcard setup
+        updateFlashcard('steering');
+        updateFlashcard('tyre');
+        
+        // Flashcard button events
+        document.getElementById('flip-card').addEventListener('click', () => {
+            document.getElementById('flashcard-1').classList.toggle('flipped');
+        });
+        
+        document.getElementById('next-card').addEventListener('click', () => {
+            currentSteeringCard = (currentSteeringCard + 1) % steeringTerms.length;
+            updateFlashcard('steering');
+        });
+        
+        document.getElementById('prev-card').addEventListener('click', () => {
+            currentSteeringCard = (currentSteeringCard - 1 + steeringTerms.length) % steeringTerms.length;
+            updateFlashcard('steering');
+        });
+        
+        document.getElementById('tyre-flip-card').addEventListener('click', () => {
+            document.getElementById('tyre-flashcard-1').classList.toggle('flipped');
+        });
+        
+        document.getElementById('tyre-next-card').addEventListener('click', () => {
+            currentTyreCard = (currentTyreCard + 1) % tyreTerms.length;
+            updateFlashcard('tyre');
+        });
+        
+        document.getElementById('tyre-prev-card').addEventListener('click', () => {
+            currentTyreCard = (currentTyreCard - 1 + tyreTerms.length) % tyreTerms.length;
+            updateFlashcard('tyre');
+        });
+        
+        // Mock Exam
+        document.getElementById('check-exam').addEventListener('click', () => {
+            const examQuestions = document.querySelectorAll('#mock-exam .question');
+            let score = 0;
+            let answered = 0;
+            
+            examQuestions.forEach(question => {
+                const selectedOption = question.querySelector('.option.selected');
+                const feedback = question.querySelector('.feedback');
+                
+                if (selectedOption) {
+                    answered++;
+                    
+                    if (selectedOption.hasAttribute('data-correct')) {
+                        selectedOption.classList.add('correct');
+                        feedback.textContent = 'Correct!';
+                        feedback.classList.add('correct');
+                        feedback.classList.remove('wrong');
+                        score++;
+                    } else {
+                        selectedOption.classList.add('wrong');
+                        const correctOption = question.querySelector('.option[data-correct="true"]');
+                        correctOption.classList.add('correct');
+                        feedback.textContent = 'Incorrect. The correct answer is highlighted.';
+                        feedback.classList.add('wrong');
+                        feedback.classList.remove('correct');
                     }
+                    feedback.style.display = 'block';
                 }
-            }
-        }
-        
-        // Add mind map item
-        function addMindMapItem(containerId) {
-            const container = document.getElementById(containerId);
-            const details = container.querySelector('.mind-map-details');
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.placeholder = 'Enter new item';
-            details.appendChild(input);
-        }
-        
-        // Add scenario
-        function addScenario() {
-            const container = document.getElementById('scenarios-container');
-            const scenarioCount = container.children.length + 1;
+            });
             
-            const scenarioDiv = document.createElement('div');
-            scenarioDiv.className = 'scenario';
+            // Update progress bar
+            const progressBar = document.getElementById('exam-progress');
+            progressBar.style.width = `${answered * 10}%`;
+            progressBar.textContent = `${answered * 10}%`;
             
-            const causesContainerId = `causes-container-${scenarioCount}`;
-            const proceduresContainerId = `procedures-container-${scenarioCount}`;
-            
-            scenarioDiv.innerHTML = `
-                <div class="scenario-title">Scenario ${scenarioCount}</div>
-                <div>
-                    <p>Vehicle symptoms:</p>
-                    <textarea placeholder="Describe the symptoms a vehicle might present..."></textarea>
-                    
-                    <p>Possible causes:</p>
-                    <div id="${causesContainerId}">
-                        <div class="cause-item">
-                            <input type="text" placeholder="Possible cause 1">
-                        </div>
-                        <div class="cause-item">
-                            <input type="text" placeholder="Possible cause 2">
-                        </div>
-                        <div class="cause-item">
-                            <input type="text" placeholder="Possible cause 3">
-                        </div>
+            // Display result if all questions answered
+            if (answered === examQuestions.length) {
+                const resultElement = document.getElementById('exam-result');
+                const percentage = (score / examQuestions.length) * 100;
+                
+                let resultClass, resultText;
+                
+                if (percentage >= 80) {
+                    resultClass = 'correct';
+                    resultText = 'Excellent!';
+                } else if (percentage >= 60) {
+                    resultClass = 'correct';
+                    resultText = 'Good job!';
+                } else {
+                    resultClass = 'wrong';
+                    resultText = 'Needs improvement.';
+                }
+                
+                resultElement.innerHTML = `
+                    <div class="feedback ${resultClass}" style="display: block;">
+                        <h3>Exam Results</h3>
+                        <p><strong>Score: ${score}/${examQuestions.length} (${percentage}%)</strong></p>
+                        <p>${resultText}</p>
+                        <p>Revisit any sections you struggled with before your actual exam.</p>
                     </div>
-                    <button class="add-button" onclick="addCauseItem('${causesContainerId}')">+ Add Cause</button>
-                    
-                    <p>Inspection procedures:</p>
-                    <div id="${proceduresContainerId}">
-                        <div class="procedure-item">
-                            <input type="text" placeholder="Inspection procedure 1">
-                        </div>
-                        <div class="procedure-item">
-                            <input type="text" placeholder="Inspection procedure 2">
-                        </div>
-                        <div class="procedure-item">
-                            <input type="text" placeholder="Inspection procedure 3">
-                        </div>
-                    </div>
-                    <button class="add-button" onclick="addProcedureItem('${proceduresContainerId}')">+ Add Procedure</button>
-                    
-                    <p>Recommended repairs:</p>
-                    <textarea placeholder="Describe the recommended repairs..."></textarea>
-                </div>
-            `;
-            
-            container.appendChild(scenarioDiv);
-        }
-        
-        // Add cause item
-        function addCauseItem(containerId) {
-            const container = document.getElementById(containerId);
-            const causeItem = document.createElement('div');
-            causeItem.className = 'cause-item';
-            causeItem.innerHTML = `<input type="text" placeholder="Possible cause">`;
-            container.appendChild(causeItem);
-        }
-        
-        // Add procedure item
-        function addProcedureItem(containerId) {
-            const container = document.getElementById(containerId);
-            const procedureItem = document.createElement('div');
-            procedureItem.className = 'procedure-item';
-            procedureItem.innerHTML = `<input type="text" placeholder="Inspection procedure">`;
-            container.appendChild(procedureItem);
-        }
-        
-        // Add component
-        function addComponent() {
-            const container = document.getElementById('key-components-container');
-            const componentItem = document.createElement('div');
-            componentItem.className = 'component-item';
-            componentItem.innerHTML = `<input type="text" placeholder="Component and brief description">`;
-            container.appendChild(componentItem);
-        }
-        
-        // Add defect
-        function addDefect() {
-            const container = document.getElementById('defects-list-container');
-            const defectItem = document.createElement('div');
-            defectItem.className = 'key-term';
-            defectItem.innerHTML = `
-                <input type="text" placeholder="Symptom">
-                <input type="text" placeholder="Likely Cause">
-            `;
-            container.appendChild(defectItem);
-        }
-        
-        // Add term
-        function addTerm() {
-            const container = document.getElementById('terminology-container');
-            const termItem = document.createElement('div');
-            termItem.className = 'key-term';
-            termItem.innerHTML = `
-                <input type="text" placeholder="Term">
-                <input type="text" placeholder="Definition">
-            `;
-            container.appendChild(termItem);
-        }
-        
-        // Add checklist item
-        function addChecklistItem() {
-            const container = document.getElementById('checklist-container');
-            const checklistItem = document.createElement('div');
-            checklistItem.className = 'checkbox-item';
-            checklistItem.innerHTML = `
-                <input type="checkbox">
-                <input type="text" placeholder="Inspection item">
-            `;
-            container.appendChild(checklistItem);
-        }
-        
-        // Add priority
-        function addPriority() {
-            const container = document.getElementById('priorities-container');
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.placeholder = 'Additional priority';
-            container.appendChild(input);
-        }
-        
-        // Save worksheet to local storage
-        function saveWorksheet() {
-            const data = gatherAllData();
-            localStorage.setItem('chassisWorksheet', JSON.stringify(data));
-            alert('Your revision guide has been saved to your device! You can continue later where you left off.');
-        }
-        
-        // Download summary as text file
-        function downloadSummary() {
-            const data = gatherAllData();
-            const summary = generateSummaryText(data);
-            
-            // Create a blob and download link
-            const blob = new Blob([summary], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'Chassis_Systems_Summary.txt';
-            document.body.appendChild(a);
-            a.click();
-            
-            // Clean up
-            setTimeout(function() {
-                document.body.removeChild(a);
-                window.URL.revokeObjectURL(url);
-            }, 0);
-        }
-        
-        // Email to instructor
-        function emailToInstructor() {
-            const instructorEmail = document.getElementById('instructor-email').value;
-            
-            if (!instructorEmail) {
-                alert('Please enter your instructor\'s email address first.');
-                return;
+                `;
+                resultElement.style.display = 'block';
             }
-            
-            const data = gatherAllData();
-            const summary = generateSummaryText(data);
-            
-            // Create email body with encoded content
-            const studentName = prompt("Please enter your full name:", "");
-            const subject = studentName ? `Chassis Systems Revision - ${studentName}` : "Chassis Systems Revision Summary";
-            const emailBody = encodeURIComponent("Please find my completed Chassis Systems revision summary below:\n\n" + summary);
-            
-            // Open default email client with pre-filled content
-            window.location.href = `mailto:${encodeURIComponent(instructorEmail)}?subject=${encodeURIComponent(subject)}&body=${emailBody}`;
-        }
-        
-        // Gather all data from the form
-        function gatherAllData() {
-            const system = document.getElementById('system-select').value;
-            
-            // Mind map data
-            const components = Array.from(document.querySelectorAll('#components-container input')).map(input => input.value);
-            const operations = Array.from(document.querySelectorAll('#operation-container input')).map(input => input.value);
-            const advantages = Array.from(document.querySelectorAll('#advantages-container input')).map(input => input.value);
-            const defects = Array.from(document.querySelectorAll('#defects-container input')).map(input => input.value);
-            const procedures = Array.from(document.querySelectorAll('#procedures-container input')).map(input => input.value);
-            
-            // Scenarios data
-            const scenarios = [];
-            const scenarioDivs = document.querySelectorAll('#scenarios-container .scenario');
-            scenarioDivs.forEach((div, index) => {
-                const symptoms = div.querySelector('textarea:nth-of-type(1)').value;
-                const causes = Array.from(div.querySelectorAll(`#causes-container-${index+1} input`)).map(input => input.value);
-                const inspections = Array.from(div.querySelectorAll(`#procedures-container-${index+1} input`)).map(input => input.value);
-                const repairs = div.querySelector('textarea:nth-of-type(2)').value;
-                
-                scenarios.push({
-                    symptoms,
-                    causes,
-                    inspections,
-                    repairs
-                });
-            });
-            
-            // Visual reference guide data
-            const keyComponents = Array.from(document.querySelectorAll('#key-components-container input')).map(input => input.value);
-            const diagramNotes = document.querySelector('#part3 textarea:nth-of-type(1)').value;
-            
-            const commonDefects = [];
-            const defectRows = document.querySelectorAll('#defects-list-container .key-term');
-            defectRows.forEach(row => {
-                const inputs = row.querySelectorAll('input');
-                if (inputs[0].value || inputs[1].value) {
-                    commonDefects.push({
-                        symptom: inputs[0].value,
-                        cause: inputs[1].value
-                    });
-                }
-            });
-            
-            const terminology = [];
-            const termRows = document.querySelectorAll('#terminology-container .key-term');
-            termRows.forEach(row => {
-                const inputs = row.querySelectorAll('input');
-                if (inputs[0].value || inputs[1].value) {
-                    terminology.push({
-                        term: inputs[0].value,
-                        definition: inputs[1].value
-                    });
-                }
-            });
-            
-            const checklist = [];
-            const checkboxItems = document.querySelectorAll('#checklist-container .checkbox-item');
-            checkboxItems.forEach(item => {
-                const checked = item.querySelector('input[type="checkbox"]').checked;
-                const text = item.querySelector('input[type="text"]').value;
-                if (text) {
-                    checklist.push({
-                        done: checked,
-                        text: text
-                    });
-                }
-            });
-            
-            // Knowledge sharing data
-            const keyPoints = Array.from(document.querySelectorAll('#part4 input[type="text"]')).map(input => input.value);
-            const steeringNotes = document.querySelector('#part4 textarea:nth-of-type(1)').value;
-            const suspensionNotes = document.querySelector('#part4 textarea:nth-of-type(2)').value;
-            const brakesNotes = document.querySelector('#part4 textarea:nth-of-type(3)').value;
-            const wheelsNotes = document.querySelector('#part4 textarea:nth-of-type(4)').value;
-            
-            // Self-assessment data
-            const ratings = {
-                steering: document.querySelector('#assessment select:nth-of-type(1)').value,
-                suspension: document.querySelector('#assessment select:nth-of-type(2)').value,
-                brakes: document.querySelector('#assessment select:nth-of-type(3)').value,
-                wheelsAndTyres: document.querySelector('#assessment select:nth-of-type(4)').value
-            };
-            
-            const priorities = Array.from(document.querySelectorAll('#priorities-container input')).map(input => input.value);
-            const additionalNotes = document.querySelector('#assessment textarea').value;
-            
-            return {
-                system,
-                mindMap: {
-                    components,
-                    operations,
-                    advantages,
-                    defects,
-                    procedures
-                },
-                scenarios,
-                referenceGuide: {
-                    keyComponents,
-                    diagramNotes,
-                    commonDefects,
-                    terminology,
-                    checklist
-                },
-                knowledgeSharing: {
-                    keyPoints,
-                    steeringNotes,
-                    suspensionNotes,
-                    brakesNotes,
-                    wheelsNotes
-                },
-                assessment: {
-                    ratings,
-                    priorities,
-                    additionalNotes
-                }
-            };
-        }
-        
-        // Generate formatted text summary
-        function generateSummaryText(data) {
-            const summary = [];
-            
-            // Header
-            summary.push("# CHASSIS SYSTEMS REVISION SUMMARY");
-            summary.push(`## ${data.system || "Not specified"} System\n`);
-            
-            // Mind Map
-            summary.push("## KNOWLEDGE ORGANIZATION");
-            
-            summary.push("### Components:");
-            data.mindMap.components.forEach(item => {
-                if (item) summary.push(`- ${item}`);
-            });
-            
-            summary.push("\n### Operation Principles:");
-            data.mindMap.operations.forEach(item => {
-                if (item) summary.push(`- ${item}`);
-            });
-            
-            summary.push("\n### Advantages:");
-            data.mindMap.advantages.forEach(item => {
-                if (item) summary.push(`- ${item}`);
-            });
-            
-            summary.push("\n### Common Defects:");
-            data.mindMap.defects.forEach(item => {
-                if (item) summary.push(`- ${item}`);
-            });
-            
-            summary.push("\n### Inspection Procedures:");
-            data.mindMap.procedures.forEach(item => {
-                if (item) summary.push(`- ${item}`);
-            });
-            
-            // Scenarios
-            summary.push("\n\n## DIAGNOSTIC SCENARIOS");
-            
-            data.scenarios.forEach((scenario, index) => {
-                summary.push(`\n### Scenario ${index + 1}:`);
-                summary.push(`Vehicle Symptoms: ${scenario.symptoms || "Not specified"}`);
-                
-                summary.push("\nPossible Causes:");
-                scenario.causes.forEach(cause => {
-                    if (cause) summary.push(`- ${cause}`);
-                });
-                
-                summary.push("\nInspection Procedures:");
-                scenario.inspections.forEach(procedure => {
-                    if (procedure) summary.push(`- ${procedure}`);
-                });
-                
-                summary.push(`\nRecommended Repairs: ${scenario.repairs || "Not specified"}`);
-            });
-            
-            // Visual Reference Guide
-            summary.push("\n\n## VISUAL REFERENCE GUIDE");
-            
-            summary.push("\n### Key Components:");
-            data.referenceGuide.keyComponents.forEach(component => {
-                if (component) summary.push(`- ${component}`);
-            });
-            
-            summary.push(`\n### Component Diagram Notes:\n${data.referenceGuide.diagramNotes || "No notes provided"}`);
-            
-            summary.push("\n### Common Defects:");
-            data.referenceGuide.commonDefects.forEach(defect => {
-                if (defect.symptom || defect.cause) {
-                    summary.push(`- Symptom: ${defect.symptom || "Not specified"} | Cause: ${defect.cause || "Not specified"}`);
-                }
-            });
-            
-            summary.push("\n### Key Terminology:");
-            data.referenceGuide.terminology.forEach(term => {
-                if (term.term || term.definition) {
-                    summary.push(`- ${term.term || "Term"}: ${term.definition || "No definition provided"}`);
-                }
-            });
-            
-            summary.push("\n### Inspection Checklist:");
-            data.referenceGuide.checklist.forEach(item => {
-                if (item.text) {
-                    summary.push(`- [${item.done ? "X" : " "}] ${item.text}`);
-                }
-            });
-            
-            // Knowledge Sharing
-            summary.push("\n\n## KNOWLEDGE SHARING");
-            
-            summary.push("\n### Key Points to Share:");
-            data.knowledgeSharing.keyPoints.forEach(point => {
-                if (point) summary.push(`- ${point}`);
-            });
-            
-            summary.push(`\n### Steering System Notes:\n${data.knowledgeSharing.steeringNotes || "No notes provided"}`);
-            summary.push(`\n### Suspension System Notes:\n${data.knowledgeSharing.suspensionNotes || "No notes provided"}`);
-            summary.push(`\n### Braking System Notes:\n${data.knowledgeSharing.brakesNotes || "No notes provided"}`);
-            summary.push(`\n### Wheels and Tyres Notes:\n${data.knowledgeSharing.wheelsNotes || "No notes provided"}`);
-            
-            // Self-Assessment
-            summary.push("\n\n## SELF-ASSESSMENT");
-            
-            summary.push("\n### Confidence Ratings (1-5):");
-            summary.push(`- Steering: ${data.assessment.ratings.steering}/5`);
-            summary.push(`- Suspension: ${data.assessment.ratings.suspension}/5`);
-            summary.push(`- Brakes: ${data.assessment.ratings.brakes}/5`);
-            summary.push(`- Wheels & Tyres: ${data.assessment.ratings.wheelsAndTyres}/5`);
-            
-            summary.push("\n### Revision Priorities:");
-            data.assessment.priorities.forEach(priority => {
-                if (priority) summary.push(`- ${priority}`);
-            });
-            
-            summary.push(`\n### Additional Notes:\n${data.assessment.additionalNotes || "No additional notes"}`);
-            
-            return summary.join('\n');
-        }
-        
-        // Timer functionality - time tracker (counts up)
-        function startTimer(display) {
-            let seconds = 0;
-            setInterval(function () {
-                seconds++;
-                
-                const hours = Math.floor(seconds / 3600);
-                const minutes = Math.floor((seconds % 3600) / 60);
-                const remainingSeconds = seconds % 60;
-                
-                const formattedHours = hours < 10 ? "0" + hours : hours;
-                const formattedMinutes = minutes < 10 ? "0" + minutes : minutes;
-                const formattedSeconds = remainingSeconds < 10 ? "0" + remainingSeconds : remainingSeconds;
-                
-                display.textContent = formattedHours + ":" + formattedMinutes + ":" + formattedSeconds;
-            }, 1000);
-        }
-
-        window.onload = function () {
-            // Start timer
-            const twoHours = 60 * 120; // 120 minutes in seconds
-            const display = document.querySelector('#timer');
-            startTimer(twoHours, display);
-            
-            // Load saved data if it exists
-            try {
-                const savedData = localStorage.getItem('chassisWorksheet');
-                if (savedData) {
-                    const shouldRestore = confirm("Found a previously saved session. Would you like to restore your work?");
-                    if (shouldRestore) {
-                        restoreData(JSON.parse(savedData));
-                    }
-                }
-            } catch (e) {
-                console.error("Error loading saved data:", e);
-            }
-        };
-        
-        // Restore saved data
-        function restoreData(data) {
-            // Restore system selection
-            if (data.system) {
-                const systemSelect = document.getElementById('system-select');
-                systemSelect.value = data.system;
-                const event = new Event('change');
-                systemSelect.dispatchEvent(event);
-            }
-            
-            // This is a simplified restoration - in a full implementation,
-            // you'd restore all the form fields from the saved data
-            alert("Your previous work has been restored! (Note: In this demo, only some data is restored)");
-        }
+        });
     </script>
 </body>
 </html>
