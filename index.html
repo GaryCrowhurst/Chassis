@@ -1208,9 +1208,8 @@
 
         window.onload = function () {
             // Start timer
-            const twoHours = 60 * 120; // 120 minutes in seconds
             const display = document.querySelector('#timer');
-            startTimer(twoHours, display);
+            startTimer(display);
             
             // Load saved data if it exists
             try {
@@ -1226,19 +1225,238 @@
             }
         };
         
-        // Restore saved data
+        // Full implementation of restore data function
         function restoreData(data) {
             // Restore system selection
             if (data.system) {
                 const systemSelect = document.getElementById('system-select');
                 systemSelect.value = data.system;
-                const event = new Event('change');
-                systemSelect.dispatchEvent(event);
+                
+                // Update the system display spans
+                const displays = document.querySelectorAll('#selected-system-display');
+                displays.forEach(display => {
+                    display.textContent = data.system;
+                });
             }
             
-            // This is a simplified restoration - in a full implementation,
-            // you'd restore all the form fields from the saved data
-            alert("Your previous work has been restored! (Note: In this demo, only some data is restored)");
+            // Restore Mind Map data
+            restoreInputArray('#components-container', data.mindMap.components);
+            restoreInputArray('#operation-container', data.mindMap.operations);
+            restoreInputArray('#advantages-container', data.mindMap.advantages);
+            restoreInputArray('#defects-container', data.mindMap.defects);
+            restoreInputArray('#procedures-container', data.mindMap.procedures);
+            
+            // Restore Scenarios data
+            if (data.scenarios && data.scenarios.length > 0) {
+                // Clear existing scenarios except the first one
+                const scenariosContainer = document.getElementById('scenarios-container');
+                while (scenariosContainer.children.length > 1) {
+                    scenariosContainer.removeChild(scenariosContainer.lastChild);
+                }
+                
+                // Restore first scenario
+                let firstScenario = scenariosContainer.querySelector('.scenario');
+                if (firstScenario && data.scenarios[0]) {
+                    firstScenario.querySelector('textarea:nth-of-type(1)').value = data.scenarios[0].symptoms || '';
+                    restoreInputArray('#causes-container-1', data.scenarios[0].causes);
+                    restoreInputArray('#procedures-container-1', data.scenarios[0].inspections);
+                    firstScenario.querySelector('textarea:nth-of-type(2)').value = data.scenarios[0].repairs || '';
+                }
+                
+                // Create and restore additional scenarios
+                for (let i = 1; i < data.scenarios.length; i++) {
+                    addScenario(); // This adds a new scenario to the DOM
+                    
+                    // Get the newly added scenario and populate it
+                    const newScenario = scenariosContainer.lastChild;
+                    newScenario.querySelector('textarea:nth-of-type(1)').value = data.scenarios[i].symptoms || '';
+                    
+                    const causesContainerId = `causes-container-${i+1}`;
+                    const proceduresContainerId = `procedures-container-${i+1}`;
+                    
+                    // Create cause and procedure items if needed
+                    ensureItemsExist(causesContainerId, data.scenarios[i].causes.length, addCauseItem);
+                    ensureItemsExist(proceduresContainerId, data.scenarios[i].inspections.length, addProcedureItem);
+                    
+                    // Restore values
+                    restoreInputArray(`#${causesContainerId}`, data.scenarios[i].causes);
+                    restoreInputArray(`#${proceduresContainerId}`, data.scenarios[i].inspections);
+                    
+                    newScenario.querySelector('textarea:nth-of-type(2)').value = data.scenarios[i].repairs || '';
+                }
+            }
+            
+            // Restore Visual Reference Guide data
+            restoreInputArray('#key-components-container', data.referenceGuide.keyComponents);
+            document.querySelector('#part3 textarea:nth-of-type(1)').value = data.referenceGuide.diagramNotes || '';
+            
+            // Restore Common Defects
+            if (data.referenceGuide.commonDefects && data.referenceGuide.commonDefects.length > 0) {
+                const defectsContainer = document.getElementById('defects-list-container');
+                
+                // Ensure we have enough key-term divs
+                while (defectsContainer.children.length < data.referenceGuide.commonDefects.length) {
+                    addDefect();
+                }
+                
+                // Populate values
+                const defectRows = defectsContainer.querySelectorAll('.key-term');
+                data.referenceGuide.commonDefects.forEach((defect, index) => {
+                    if (index < defectRows.length) {
+                        const inputs = defectRows[index].querySelectorAll('input');
+                        inputs[0].value = defect.symptom || '';
+                        inputs[1].value = defect.cause || '';
+                    }
+                });
+            }
+            
+            // Restore Terminology
+            if (data.referenceGuide.terminology && data.referenceGuide.terminology.length > 0) {
+                const terminologyContainer = document.getElementById('terminology-container');
+                
+                // Ensure we have enough key-term divs
+                while (terminologyContainer.children.length < data.referenceGuide.terminology.length) {
+                    addTerm();
+                }
+                
+                // Populate values
+                const termRows = terminologyContainer.querySelectorAll('.key-term');
+                data.referenceGuide.terminology.forEach((term, index) => {
+                    if (index < termRows.length) {
+                        const inputs = termRows[index].querySelectorAll('input');
+                        inputs[0].value = term.term || '';
+                        inputs[1].value = term.definition || '';
+                    }
+                });
+            }
+            
+            // Restore Checklist
+            if (data.referenceGuide.checklist && data.referenceGuide.checklist.length > 0) {
+                const checklistContainer = document.getElementById('checklist-container');
+                
+                // Ensure we have enough checkbox items
+                while (checklistContainer.children.length < data.referenceGuide.checklist.length) {
+                    addChecklistItem();
+                }
+                
+                // Populate values
+                const checkboxItems = checklistContainer.querySelectorAll('.checkbox-item');
+                data.referenceGuide.checklist.forEach((item, index) => {
+                    if (index < checkboxItems.length) {
+                        checkboxItems[index].querySelector('input[type="checkbox"]').checked = item.done || false;
+                        checkboxItems[index].querySelector('input[type="text"]').value = item.text || '';
+                    }
+                });
+            }
+            
+            // Restore Knowledge Sharing data
+            const keyPointInputs = document.querySelectorAll('#part4 input[type="text"]');
+            data.knowledgeSharing.keyPoints.forEach((point, index) => {
+                if (index < keyPointInputs.length) {
+                    keyPointInputs[index].value = point || '';
+                }
+            });
+            
+            const part4Textareas = document.querySelectorAll('#part4 textarea');
+            if (part4Textareas.length >= 4) {
+                part4Textareas[0].value = data.knowledgeSharing.steeringNotes || '';
+                part4Textareas[1].value = data.knowledgeSharing.suspensionNotes || '';
+                part4Textareas[2].value = data.knowledgeSharing.brakesNotes || '';
+                part4Textareas[3].value = data.knowledgeSharing.wheelsNotes || '';
+            }
+            
+            // Restore Self-Assessment data
+            const ratingSelects = document.querySelectorAll('#assessment select');
+            if (ratingSelects.length >= 4) {
+                ratingSelects[0].value = data.assessment.ratings.steering || '1';
+                ratingSelects[1].value = data.assessment.ratings.suspension || '1';
+                ratingSelects[2].value = data.assessment.ratings.brakes || '1';
+                ratingSelects[3].value = data.assessment.ratings.wheelsAndTyres || '1';
+            }
+            
+            restoreInputArray('#priorities-container', data.assessment.priorities);
+            document.querySelector('#assessment textarea').value = data.assessment.additionalNotes || '';
+            
+            alert("Your previous work has been fully restored!");
+        }
+        
+        // Helper function to restore values to an array of input fields in a container
+        function restoreInputArray(containerId, values) {
+            if (!values || !values.length) return;
+            
+            const container = document.querySelector(containerId);
+            if (!container) return;
+            
+            // Check if container has a mind-map-details div for mind map items
+            const inputContainer = container.querySelector('.mind-map-details') || container;
+            
+            // Get all inputs in the container
+            let inputs = inputContainer.querySelectorAll('input[type="text"]');
+            
+            // If we need to add more input fields
+            if (inputs.length < values.length) {
+                if (containerId.includes('components-container')) {
+                    for (let i = inputs.length; i < values.length; i++) {
+                        addMindMapItem('components-container');
+                    }
+                } else if (containerId.includes('operation-container')) {
+                    for (let i = inputs.length; i < values.length; i++) {
+                        addMindMapItem('operation-container');
+                    }
+                } else if (containerId.includes('advantages-container')) {
+                    for (let i = inputs.length; i < values.length; i++) {
+                        addMindMapItem('advantages-container');
+                    }
+                } else if (containerId.includes('defects-container')) {
+                    for (let i = inputs.length; i < values.length; i++) {
+                        addMindMapItem('defects-container');
+                    }
+                } else if (containerId.includes('procedures-container')) {
+                    for (let i = inputs.length; i < values.length; i++) {
+                        addMindMapItem('procedures-container');
+                    }
+                } else if (containerId.includes('key-components-container')) {
+                    for (let i = inputs.length; i < values.length; i++) {
+                        addComponent();
+                    }
+                } else if (containerId.includes('priorities-container')) {
+                    for (let i = inputs.length; i < values.length; i++) {
+                        addPriority();
+                    }
+                } else if (containerId.includes('causes-container')) {
+                    for (let i = inputs.length; i < values.length; i++) {
+                        addCauseItem(containerId.substring(1)); // Remove the # from the selector
+                    }
+                } else if (containerId.includes('procedures-container-')) {
+                    for (let i = inputs.length; i < values.length; i++) {
+                        addProcedureItem(containerId.substring(1)); // Remove the # from the selector
+                    }
+                }
+                
+                // Get inputs again after potentially adding more
+                inputs = inputContainer.querySelectorAll('input[type="text"]');
+            }
+            
+            // Set values to inputs
+            values.forEach((value, index) => {
+                if (index < inputs.length) {
+                    inputs[index].value = value || '';
+                }
+            });
+        }
+        
+        // Helper function to ensure a container has enough items
+        function ensureItemsExist(containerId, count, addFunction) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            
+            const currentItems = container.children.length;
+            
+            if (currentItems < count) {
+                for (let i = currentItems; i < count; i++) {
+                    addFunction(containerId);
+                }
+            }
         }
     </script>
 </body>
