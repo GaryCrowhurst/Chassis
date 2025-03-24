@@ -227,6 +227,20 @@
             border-radius: 4px;
             margin-bottom: 15px;
         }
+        
+        #save-indicator {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #27ae60;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            transition: opacity 0.5s;
+            opacity: 0;
+            z-index: 1000;
+        }
 
         
     .chassis-banner {
@@ -726,6 +740,9 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Save indicator -->
+        <div id="save-indicator">All changes saved</div>
     </div>
 
     <script>
@@ -774,6 +791,7 @@
             input.type = 'text';
             input.placeholder = 'Enter new item';
             details.appendChild(input);
+            trackNewInput(input);
         }
         
         // Add scenario
@@ -827,6 +845,10 @@
             `;
             
             container.appendChild(scenarioDiv);
+            
+            // Track new inputs in the scenario
+            const newInputs = scenarioDiv.querySelectorAll('input, textarea');
+            newInputs.forEach(input => trackNewInput(input));
         }
         
         // Add cause item
@@ -836,6 +858,7 @@
             causeItem.className = 'cause-item';
             causeItem.innerHTML = `<input type="text" placeholder="Possible cause">`;
             container.appendChild(causeItem);
+            trackNewInput(causeItem.querySelector('input'));
         }
         
         // Add procedure item
@@ -845,6 +868,7 @@
             procedureItem.className = 'procedure-item';
             procedureItem.innerHTML = `<input type="text" placeholder="Inspection procedure">`;
             container.appendChild(procedureItem);
+            trackNewInput(procedureItem.querySelector('input'));
         }
         
         // Add component
@@ -854,6 +878,7 @@
             componentItem.className = 'component-item';
             componentItem.innerHTML = `<input type="text" placeholder="Component and brief description">`;
             container.appendChild(componentItem);
+            trackNewInput(componentItem.querySelector('input'));
         }
         
         // Add defect
@@ -866,6 +891,10 @@
                 <input type="text" placeholder="Likely Cause">
             `;
             container.appendChild(defectItem);
+            
+            // Track new inputs
+            const inputs = defectItem.querySelectorAll('input');
+            inputs.forEach(input => trackNewInput(input));
         }
         
         // Add term
@@ -878,6 +907,10 @@
                 <input type="text" placeholder="Definition">
             `;
             container.appendChild(termItem);
+            
+            // Track new inputs
+            const inputs = termItem.querySelectorAll('input');
+            inputs.forEach(input => trackNewInput(input));
         }
         
         // Add checklist item
@@ -890,6 +923,10 @@
                 <input type="text" placeholder="Inspection item">
             `;
             container.appendChild(checklistItem);
+            
+            // Track new inputs
+            const inputs = checklistItem.querySelectorAll('input');
+            inputs.forEach(input => trackNewInput(input));
         }
         
         // Add priority
@@ -899,56 +936,100 @@
             input.type = 'text';
             input.placeholder = 'Additional priority';
             container.appendChild(input);
+            trackNewInput(input);
         }
         
-        // Save worksheet to local storage
-        function saveWorksheet() {
-            const data = gatherAllData();
-            localStorage.setItem('chassisWorksheet', JSON.stringify(data));
-            alert('Your revision guide has been saved to your device! You can continue later where you left off.');
-        }
+        // Auto-save functionality
+        let lastSaved = new Date().getTime();
+        let unsavedChanges = false;
         
-        // Download summary as text file
-        function downloadSummary() {
-            const data = gatherAllData();
-            const summary = generateSummaryText(data);
-            
-            // Create a blob and download link
-            const blob = new Blob([summary], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'Chassis_Systems_Summary.txt';
-            document.body.appendChild(a);
-            a.click();
-            
-            // Clean up
-            setTimeout(function() {
-                document.body.removeChild(a);
-                window.URL.revokeObjectURL(url);
-            }, 0);
-        }
-        
-        // Email to instructor
-        function emailToInstructor() {
-            const instructorEmail = document.getElementById('instructor-email').value;
-            
-            if (!instructorEmail) {
-                alert('Please enter your instructor\'s email address first.');
-                return;
+        // Update save indicator
+        function updateSaveIndicator(message, success = true) {
+            const indicator = document.getElementById('save-indicator');
+            if (indicator) {
+                indicator.textContent = message;
+                indicator.style.backgroundColor = success ? '#27ae60' : '#e74c3c';
+                indicator.style.opacity = '1';
+                
+                // Hide after 3 seconds
+                setTimeout(() => {
+                    indicator.style.opacity = '0';
+                }, 3000);
             }
-            
-            const data = gatherAllData();
-            const summary = generateSummaryText(data);
-            
-            // Create email body with encoded content
-            const studentName = prompt("Please enter your full name:", "");
-            const subject = studentName ? `Chassis Systems Revision - ${studentName}` : "Chassis Systems Revision Summary";
-            const emailBody = encodeURIComponent("Please find my completed Chassis Systems revision summary below:\n\n" + summary);
-            
-            // Open default email client with pre-filled content
-            window.location.href = `mailto:${encodeURIComponent(instructorEmail)}?subject=${encodeURIComponent(subject)}&body=${emailBody}`;
         }
+        
+        // Auto-save function
+        function autoSave() {
+            if (unsavedChanges) {
+                try {
+                    const data = gatherAllData();
+                    localStorage.setItem('chassisWorksheet', JSON.stringify(data));
+                    lastSaved = new Date().getTime();
+                    unsavedChanges = false;
+                    updateSaveIndicator('Auto-saved successfully');
+                } catch (error) {
+                    console.error('Auto-save failed:', error);
+                    updateSaveIndicator('Auto-save failed', false);
+                }
+            }
+        }
+        
+        // Set up auto-save timer (every 2 minutes)
+        const autoSaveInterval = 2 * 60 * 1000; // 2 minutes in milliseconds
+        setInterval(autoSave, autoSaveInterval);
+        
+        // Track changes in inputs
+        function trackNewInput(input) {
+            input.setAttribute('data-tracked', 'true');
+            
+            if (input.type === 'checkbox') {
+                input.addEventListener('change', () => {
+                    unsavedChanges = true;
+                });
+            } else if (input.tagName === 'TEXTAREA' || (input.tagName === 'INPUT' && (input.type === 'text' || input.type === 'email'))) {
+                input.addEventListener('input', () => {
+                    unsavedChanges = true;
+                });
+            } else {
+                input.addEventListener('change', () => {
+                    unsavedChanges = true;
+                });
+            }
+        }
+        
+        // Setup change tracking for all inputs
+        function setupChangeTracking() {
+            // Track all input fields and textareas
+            const inputs = document.querySelectorAll('input, textarea, select');
+            inputs.forEach(input => trackNewInput(input));
+        }
+        
+        // Enhance the save worksheet function
+        function saveWorksheet() {
+            try {
+                const data = gatherAllData();
+                localStorage.setItem('chassisWorksheet', JSON.stringify(data));
+                lastSaved = new Date().getTime();
+                unsavedChanges = false;
+                updateSaveIndicator('All changes saved');
+                return true;
+            } catch (error) {
+                console.error('Save failed:', error);
+                updateSaveIndicator('Save failed', false);
+                alert('An error occurred while saving. Please try again.');
+                return false;
+            }
+        }
+        
+        // Warning before leaving page
+        window.addEventListener('beforeunload', function(e) {
+            if (unsavedChanges) {
+                // Most modern browsers no longer display custom messages, but will show a generic warning
+                const confirmationMessage = 'You have unsaved changes. Are you sure you want to leave?';
+                e.returnValue = confirmationMessage;
+                return confirmationMessage;
+            }
+        });
         
         // Gather all data from the form
         function gatherAllData() {
@@ -1037,7 +1118,9 @@
             const priorities = Array.from(document.querySelectorAll('#priorities-container input')).map(input => input.value);
             const additionalNotes = document.querySelector('#assessment textarea').value;
             
+            // Add timestamp for auto-save recovery
             return {
+                timestamp: new Date().getTime(),
                 system,
                 mindMap: {
                     components,
@@ -1067,6 +1150,48 @@
                     additionalNotes
                 }
             };
+        }
+        
+        // Download summary as text file
+        function downloadSummary() {
+            const data = gatherAllData();
+            const summary = generateSummaryText(data);
+            
+            // Create a blob and download link
+            const blob = new Blob([summary], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Chassis_Systems_Summary.txt';
+            document.body.appendChild(a);
+            a.click();
+            
+            // Clean up
+            setTimeout(function() {
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            }, 0);
+        }
+        
+        // Email to instructor
+        function emailToInstructor() {
+            const instructorEmail = document.getElementById('instructor-email').value;
+            
+            if (!instructorEmail) {
+                alert('Please enter your instructor\'s email address first.');
+                return;
+            }
+            
+            const data = gatherAllData();
+            const summary = generateSummaryText(data);
+            
+            // Create email body with encoded content
+            const studentName = prompt("Please enter your full name:", "");
+            const subject = studentName ? `Chassis Systems Revision - ${studentName}` : "Chassis Systems Revision Summary";
+            const emailBody = encodeURIComponent("Please find my completed Chassis Systems revision summary below:\n\n" + summary);
+            
+            // Open default email client with pre-filled content
+            window.location.href = `mailto:${encodeURIComponent(instructorEmail)}?subject=${encodeURIComponent(subject)}&body=${emailBody}`;
         }
         
         // Generate formatted text summary
@@ -1187,43 +1312,6 @@
             
             return summary.join('\n');
         }
-        
-        // Timer functionality - time tracker (counts up)
-        function startTimer(display) {
-            let seconds = 0;
-            setInterval(function () {
-                seconds++;
-                
-                const hours = Math.floor(seconds / 3600);
-                const minutes = Math.floor((seconds % 3600) / 60);
-                const remainingSeconds = seconds % 60;
-                
-                const formattedHours = hours < 10 ? "0" + hours : hours;
-                const formattedMinutes = minutes < 10 ? "0" + minutes : minutes;
-                const formattedSeconds = remainingSeconds < 10 ? "0" + remainingSeconds : remainingSeconds;
-                
-                display.textContent = formattedHours + ":" + formattedMinutes + ":" + formattedSeconds;
-            }, 1000);
-        }
-
-        window.onload = function () {
-            // Start timer
-            const display = document.querySelector('#timer');
-            startTimer(display);
-            
-            // Load saved data if it exists
-            try {
-                const savedData = localStorage.getItem('chassisWorksheet');
-                if (savedData) {
-                    const shouldRestore = confirm("Found a previously saved session. Would you like to restore your work?");
-                    if (shouldRestore) {
-                        restoreData(JSON.parse(savedData));
-                    }
-                }
-            } catch (e) {
-                console.error("Error loading saved data:", e);
-            }
-        };
         
         // Full implementation of restore data function
         function restoreData(data) {
@@ -1377,7 +1465,10 @@
             restoreInputArray('#priorities-container', data.assessment.priorities);
             document.querySelector('#assessment textarea').value = data.assessment.additionalNotes || '';
             
-            alert("Your previous work has been fully restored!");
+            // Reset unsaved changes flag since we just restored
+            unsavedChanges = false;
+            
+            updateSaveIndicator('Your work has been restored');
         }
         
         // Helper function to restore values to an array of input fields in a container
@@ -1458,6 +1549,53 @@
                 }
             }
         }
+        
+        // Timer functionality - time tracker (counts up)
+        function startTimer(display) {
+            let seconds = 0;
+            setInterval(function () {
+                seconds++;
+                
+                const hours = Math.floor(seconds / 3600);
+                const minutes = Math.floor((seconds % 3600) / 60);
+                const remainingSeconds = seconds % 60;
+                
+                const formattedHours = hours < 10 ? "0" + hours : hours;
+                const formattedMinutes = minutes < 10 ? "0" + minutes : minutes;
+                const formattedSeconds = remainingSeconds < 10 ? "0" + remainingSeconds : remainingSeconds;
+                
+                display.textContent = formattedHours + ":" + formattedMinutes + ":" + formattedSeconds;
+            }, 1000);
+        }
+
+        window.onload = function () {
+            // Start timer
+            const display = document.querySelector('#timer');
+            startTimer(display);
+            
+            // Setup change tracking
+            setupChangeTracking();
+            
+            // Load saved data if it exists
+            try {
+                const savedData = localStorage.getItem('chassisWorksheet');
+                if (savedData) {
+                    const parsedData = JSON.parse(savedData);
+                    const lastSavedDate = new Date(parsedData.timestamp);
+                    
+                    // Format the date for display
+                    const formattedDate = lastSavedDate.toLocaleString();
+                    
+                    const shouldRestore = confirm(`Found a previously saved session from ${formattedDate}. Would you like to restore your work?`);
+                    if (shouldRestore) {
+                        restoreData(parsedData);
+                    }
+                }
+            } catch (e) {
+                console.error("Error loading saved data:", e);
+                updateSaveIndicator('Error loading saved data', false);
+            }
+        };
     </script>
 </body>
 </html>
