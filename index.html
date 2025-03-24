@@ -227,6 +227,102 @@
             border-radius: 4px;
             margin-bottom: 15px;
         }
+
+        
+    .chassis-banner {
+        margin: 20px 0;
+        width: 100%;
+        max-width: 100%;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .chassis-banner:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+    }
+    
+    .banner-link {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+    
+    .banner-content {
+        display: flex;
+        align-items: center;
+        padding: 20px;
+        background: linear-gradient(135deg, #1a4b84 0%, #2a7abd 100%);
+        color: white;
+    }
+    
+    .banner-icon {
+        font-size: 3rem;
+        margin-right: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 80px;
+        height: 80px;
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+    }
+    
+    .banner-text {
+        flex: 1;
+    }
+    
+    .banner-text h2 {
+        margin: 0 0 5px 0;
+        font-size: 1.8rem;
+        font-weight: bold;
+    }
+    
+    .banner-text p {
+        margin: 0 0 10px 0;
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+    
+    .banner-cta {
+        display: inline-block;
+        background-color: #f39c12;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 4px;
+        font-weight: bold;
+        margin-top: 5px;
+        transition: background-color 0.3s;
+    }
+    
+    .banner-cta:hover {
+        background-color: #e67e22;
+    }
+    
+    /* Make the banner responsive */
+    @media (max-width: 768px) {
+        .banner-content {
+            flex-direction: column;
+            text-align: center;
+            padding: 15px;
+        }
+        
+        .banner-icon {
+            margin-right: 0;
+            margin-bottom: 15px;
+        }
+        
+        .banner-text h2 {
+            font-size: 1.5rem;
+        }
+        
+        .banner-text p {
+            font-size: 1rem;
+        }
+    }
+        
         @media (max-width: 600px) {
             .key-term {
                 flex-direction: column;
@@ -237,9 +333,26 @@
             }
         }
     </style>
+    
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
+    <div class="chassis-banner">
+    <a href="index.html" class="banner-link">
+        <div class="banner-content">
+            <div class="banner-icon">
+                <i class="fas fa-car"></i>
+            </div>
+            <div class="banner-text">
+                <h2>Chassis Systems Interactive Revision</h2>
+                <p>Prepare for your Level 2 Motor Vehicle Chassis Exam</p>
+                <span class="banner-cta">Click to Start Learning</span>
+            </div>
+        </div>
+    </a>
+</div>
     <div class="container">
+        
         <h1>Chassis Systems Mastery Guide</h1>
         <p style="text-align: center;">Interactive Revision Workshop</p>
         
