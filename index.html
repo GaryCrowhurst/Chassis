@@ -325,6 +325,8 @@
         margin: 0 0 5px 0;
         font-size: 1.8rem;
         font-weight: bold;
+        border-bottom: none;
+        color: white;
     }
     
     .banner-text p {
@@ -346,6 +348,27 @@
     
     .banner-cta:hover {
         background-color: #e67e22;
+    }
+    
+    /* Improved banner with high visibility */
+    .chassis-banner {
+        position: relative;
+        overflow: visible;
+    }
+    
+    .banner-status {
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        background: #e74c3c;
+        color: white;
+        font-weight: bold;
+        font-size: 12px;
+        padding: 5px 10px;
+        border-radius: 15px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        z-index: 10;
+        border: 2px solid white;
     }
     
     /* Make the banner responsive */
@@ -379,25 +402,84 @@
                 margin-right: 0;
             }
         }
+
+        /* Toast notification styling */
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #333;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 5px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        
+        .toast.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .toast.success {
+            background-color: #2ecc71;
+        }
+        
+        .toast.error {
+            background-color: #e74c3c;
+        }
+
+        /* Save button animation */
+        .save-animation {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .save-animation:after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: save-pulse 1.5s infinite;
+        }
+        
+        @keyframes save-pulse {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
     </style>
     
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
     <div class="chassis-banner">
-    <a href="inde.html" class="banner-link">
-        <div class="banner-content">
-            <div class="banner-icon">
-                <i class="fas fa-car"></i>
+        <div class="banner-status">New Features</div>
+        <a href="index.html" class="banner-link">
+            <div class="banner-content">
+                <div class="banner-icon">
+                    <i class="fas fa-car"></i>
+                </div>
+                <div class="banner-text">
+                    <h2>Chassis Systems Interactive Revision</h2>
+                    <p>Prepare for your Level 2 Motor Vehicle Chassis Exam</p>
+                    <span class="banner-cta">Click to Start Learning</span>
+                </div>
             </div>
-            <div class="banner-text">
-                <h2>Chassis Systems Interactive Revision</h2>
-                <p>Prepare for your Level 2 Motor Vehicle Chassis Exam</p>
-                <span class="banner-cta">Click to Start Learning</span>
-            </div>
-        </div>
-    </a>
-</div>
+        </a>
+    </div>
+    
+    <!-- Toast notification for save status -->
+    <div id="toast" class="toast">
+        <span id="toast-message">Status message</span>
+    </div>
+    
     <div class="container">
         
         <h1>Chassis Systems Mastery Guide</h1>
@@ -837,6 +919,33 @@
             }
         }
         
+        // Show toast notification
+        function showToast(message, type = 'success', duration = 3000) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            
+            // Reset classes
+            toast.className = 'toast';
+            
+            // Add specific class based on type
+            if (type === 'success') {
+                toast.classList.add('success');
+            } else if (type === 'error') {
+                toast.classList.add('error');
+            }
+            
+            // Set message
+            toastMessage.textContent = message;
+            
+            // Show toast
+            toast.classList.add('show');
+            
+            // Hide after duration
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, duration);
+        }
+        
         // Add mind map item
         function addMindMapItem(containerId) {
             const container = document.getElementById(containerId);
@@ -908,6 +1017,10 @@
         // Add cause item
         function addCauseItem(containerId) {
             const container = document.getElementById(containerId);
+            if (!container) {
+                console.error(`Container ${containerId} not found`);
+                return;
+            }
             const causeItem = document.createElement('div');
             causeItem.className = 'cause-item';
             causeItem.innerHTML = `<input type="text" placeholder="Possible cause">`;
@@ -918,6 +1031,10 @@
         // Add procedure item
         function addProcedureItem(containerId) {
             const container = document.getElementById(containerId);
+            if (!container) {
+                console.error(`Container ${containerId} not found`);
+                return;
+            }
             const procedureItem = document.createElement('div');
             procedureItem.className = 'procedure-item';
             procedureItem.innerHTML = `<input type="text" placeholder="Inspection procedure">`;
@@ -1000,6 +1117,8 @@
         
         // Update save indicator
         function updateSaveIndicator(message, success = true) {
+            showToast(message, success ? 'success' : 'error');
+            
             const indicator = document.getElementById('save-indicator');
             if (indicator) {
                 indicator.textContent = message;
@@ -1023,17 +1142,37 @@
             }
         }
         
-        // Better error handling for save operation
+        // FIXED: Better error handling for save operation with debugging
         function saveWorksheet() {
             try {
-                // Try to gather data
+                // Add visual feedback that save is in progress
+                const saveButtons = document.querySelectorAll('.tab-save-button, .save-button');
+                saveButtons.forEach(button => {
+                    button.classList.add('save-animation');
+                    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+                    button.disabled = true;
+                });
+                
+                // Try to gather data with better error handling
                 let data;
                 try {
                     data = gatherAllData();
+                    
+                    if (!data) {
+                        throw new Error("Failed to gather data - returned empty result");
+                    }
                 } catch (gatherError) {
                     console.error('Error gathering data:', gatherError);
+                    
+                    // Reset buttons
+                    saveButtons.forEach(button => {
+                        button.classList.remove('save-animation');
+                        button.innerHTML = '<i class="fas fa-save"></i> Save Progress';
+                        button.disabled = false;
+                    });
+                    
                     updateSaveIndicator('Error collecting form data', false);
-                    alert('There was a problem collecting your form data. Please try again.');
+                    showToast('There was a problem collecting your form data.', 'error');
                     return false;
                 }
                 
@@ -1045,6 +1184,13 @@
                     // Handle localStorage errors (quota exceeded, etc.)
                     console.error('Storage error:', storageError);
                     
+                    // Reset buttons
+                    saveButtons.forEach(button => {
+                        button.classList.remove('save-animation');
+                        button.innerHTML = '<i class="fas fa-save"></i> Save Progress';
+                        button.disabled = false;
+                    });
+                    
                     if (storageError.name === 'QuotaExceededError' || 
                         storageError.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
                         // Storage quota exceeded error
@@ -1052,14 +1198,14 @@
                         
                         const shouldDownload = confirm('Your browser storage is full. Would you like to download a backup file instead?');
                         if (shouldDownload) {
-                            createBackupDownload();
+                            createBackupDownload(data);
                         }
                     } else {
                         updateSaveIndicator('Save failed', false);
                         
                         const shouldDownload = confirm('Failed to save your data. This might be due to browser restrictions or private browsing mode. Would you like to download a backup file instead?');
                         if (shouldDownload) {
-                            createBackupDownload();
+                            createBackupDownload(data);
                         }
                     }
                     return false;
@@ -1072,9 +1218,11 @@
                 updateLastSavedText();
                 
                 // Update save buttons
-                const saveButtons = document.querySelectorAll('.tab-save-button');
                 saveButtons.forEach(button => {
+                    button.classList.remove('save-animation');
                     button.innerHTML = '<i class="fas fa-check"></i> Saved!';
+                    button.disabled = false;
+                    
                     setTimeout(() => {
                         button.innerHTML = '<i class="fas fa-save"></i> Save Progress';
                     }, 2000);
@@ -1084,20 +1232,39 @@
             } catch (error) {
                 // Catch any other unexpected errors
                 console.error('Unexpected save error:', error);
+                
+                // Reset buttons
+                const saveButtons = document.querySelectorAll('.tab-save-button, .save-button');
+                saveButtons.forEach(button => {
+                    button.classList.remove('save-animation');
+                    button.innerHTML = '<i class="fas fa-save"></i> Save Progress';
+                    button.disabled = false;
+                });
+                
                 updateSaveIndicator('Unexpected save error', false);
                 
                 const shouldDownload = confirm('An unexpected error occurred while saving. Would you like to download a backup file instead?');
                 if (shouldDownload) {
-                    createBackupDownload();
+                    try {
+                        const data = gatherAllData();
+                        createBackupDownload(data);
+                    } catch (e) {
+                        console.error('Failed to create backup after error:', e);
+                        alert('Could not create backup. Please try copying your important data manually.');
+                    }
                 }
                 return false;
             }
         }
         
         // Create a backup download if save fails
-        function createBackupDownload() {
+        function createBackupDownload(data) {
             try {
-                const data = gatherAllData();
+                // If data wasn't passed in, try to gather it
+                if (!data) {
+                    data = gatherAllData();
+                }
+                
                 const jsonString = JSON.stringify(data);
                 
                 // Create blob for download
@@ -1121,8 +1288,7 @@
                 const container = document.querySelector('.container');
                 container.insertBefore(a, container.firstChild);
                 
-                alert('A backup download has been created. Please click the blue "Download Backup File" button at the top of the page to save your work.');
-                
+                showToast('Backup file created. Click the blue download button at the top.', 'success', 5000);
                 return true;
             } catch (error) {
                 console.error('Error creating backup download:', error);
@@ -1153,6 +1319,7 @@
         
         // Track changes in inputs
         function trackNewInput(input) {
+            if (!input) return;
             input.setAttribute('data-tracked', 'true');
             
             if (input.type === 'checkbox') {
@@ -1196,23 +1363,30 @@
         
         // Download summary as text file
         function downloadSummary() {
-            const data = gatherAllData();
-            const summary = generateSummaryText(data);
-            
-            // Create a blob and download link
-            const blob = new Blob([summary], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'Chassis_Systems_Summary.txt';
-            document.body.appendChild(a);
-            a.click();
-            
-            // Clean up
-            setTimeout(function() {
-                document.body.removeChild(a);
-                window.URL.revokeObjectURL(url);
-            }, 0);
+            try {
+                const data = gatherAllData();
+                const summary = generateSummaryText(data);
+                
+                // Create a blob and download link
+                const blob = new Blob([summary], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'Chassis_Systems_Summary.txt';
+                document.body.appendChild(a);
+                a.click();
+                
+                // Clean up
+                setTimeout(function() {
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                }, 0);
+                
+                showToast('Summary downloaded successfully', 'success');
+            } catch (error) {
+                console.error('Error downloading summary:', error);
+                showToast('Error creating summary', 'error');
+            }
         }
         
         // Email to instructor
@@ -1220,427 +1394,648 @@
             const instructorEmail = document.getElementById('instructor-email').value;
             
             if (!instructorEmail) {
-                alert('Please enter your instructor\'s email address first.');
+                showToast('Please enter instructor email', 'error');
                 return;
             }
             
-            const data = gatherAllData();
-            const summary = generateSummaryText(data);
-            
-            // Create email body with encoded content
-            const studentName = prompt("Please enter your full name:", "");
-            const subject = studentName ? `Chassis Systems Revision - ${studentName}` : "Chassis Systems Revision Summary";
-            const emailBody = encodeURIComponent("Please find my completed Chassis Systems revision summary below:\n\n" + summary);
-            
-            // Open default email client with pre-filled content
-            window.location.href = `mailto:${encodeURIComponent(instructorEmail)}?subject=${encodeURIComponent(subject)}&body=${emailBody}`;
+            try {
+                const data = gatherAllData();
+                const summary = generateSummaryText(data);
+                
+                // Create email body with encoded content
+                const studentName = prompt("Please enter your full name:", "");
+                const subject = studentName ? `Chassis Systems Revision - ${studentName}` : "Chassis Systems Revision Summary";
+                const emailBody = encodeURIComponent("Please find my completed Chassis Systems revision summary below:\n\n" + summary);
+                
+                // Open default email client with pre-filled content
+                window.location.href = `mailto:${encodeURIComponent(instructorEmail)}?subject=${encodeURIComponent(subject)}&body=${emailBody}`;
+            } catch (error) {
+                console.error('Error preparing email:', error);
+                showToast('Error preparing email content', 'error');
+            }
         }
         
-        // Gather all data from the form
+        // FIXED: Gather all data from the form with better error handling
         function gatherAllData() {
-            const system = document.getElementById('system-select').value;
-            
-            // Mind map data
-            const components = Array.from(document.querySelectorAll('#components-container input')).map(input => input.value);
-            const operations = Array.from(document.querySelectorAll('#operation-container input')).map(input => input.value);
-            const advantages = Array.from(document.querySelectorAll('#advantages-container input')).map(input => input.value);
-            const defects = Array.from(document.querySelectorAll('#defects-container input')).map(input => input.value);
-            const procedures = Array.from(document.querySelectorAll('#procedures-container input')).map(input => input.value);
-            
-            // Scenarios data
-            const scenarios = [];
-            const scenarioDivs = document.querySelectorAll('#scenarios-container .scenario');
-            scenarioDivs.forEach((div, index) => {
-                const symptoms = div.querySelector('textarea:nth-of-type(1)').value;
-                const causes = Array.from(div.querySelectorAll(`#causes-container-${index+1} input`)).map(input => input.value);
-                const inspections = Array.from(div.querySelectorAll(`#procedures-container-${index+1} input`)).map(input => input.value);
-                const repairs = div.querySelector('textarea:nth-of-type(2)').value;
+            try {
+                // Initialize data structure
+                const data = {
+                    timestamp: new Date().getTime(),
+                    system: "",
+                    mindMap: {
+                        components: [],
+                        operations: [],
+                        advantages: [],
+                        defects: [],
+                        procedures: []
+                    },
+                    scenarios: [],
+                    referenceGuide: {
+                        keyComponents: [],
+                        diagramNotes: "",
+                        commonDefects: [],
+                        terminology: [],
+                        checklist: []
+                    },
+                    knowledgeSharing: {
+                        keyPoints: [],
+                        steeringNotes: "",
+                        suspensionNotes: "",
+                        brakesNotes: "",
+                        wheelsNotes: ""
+                    },
+                    assessment: {
+                        ratings: {
+                            steering: "1",
+                            suspension: "1",
+                            brakes: "1",
+                            wheelsAndTyres: "1"
+                        },
+                        priorities: [],
+                        additionalNotes: ""
+                    }
+                };
                 
-                scenarios.push({
-                    symptoms,
-                    causes,
-                    inspections,
-                    repairs
-                });
-            });
-            
-            // Visual reference guide data
-            const keyComponents = Array.from(document.querySelectorAll('#key-components-container input')).map(input => input.value);
-            const diagramNotes = document.querySelector('#part3 textarea:nth-of-type(1)').value;
-            
-            const commonDefects = [];
-            const defectRows = document.querySelectorAll('#defects-list-container .key-term');
-            defectRows.forEach(row => {
-                const inputs = row.querySelectorAll('input');
-                if (inputs[0].value || inputs[1].value) {
-                    commonDefects.push({
-                        symptom: inputs[0].value,
-                        cause: inputs[1].value
+                // System selection
+                const systemSelect = document.getElementById('system-select');
+                if (systemSelect) {
+                    data.system = systemSelect.value;
+                }
+                
+                // Mind map data - with safety checks
+                const componentsContainer = document.getElementById('components-container');
+                if (componentsContainer) {
+                    const inputs = componentsContainer.querySelectorAll('.mind-map-details input');
+                    data.mindMap.components = Array.from(inputs).map(input => input.value || "");
+                }
+                
+                const operationContainer = document.getElementById('operation-container');
+                if (operationContainer) {
+                    const inputs = operationContainer.querySelectorAll('.mind-map-details input');
+                    data.mindMap.operations = Array.from(inputs).map(input => input.value || "");
+                }
+                
+                const advantagesContainer = document.getElementById('advantages-container');
+                if (advantagesContainer) {
+                    const inputs = advantagesContainer.querySelectorAll('.mind-map-details input');
+                    data.mindMap.advantages = Array.from(inputs).map(input => input.value || "");
+                }
+                
+                const defectsContainer = document.getElementById('defects-container');
+                if (defectsContainer) {
+                    const inputs = defectsContainer.querySelectorAll('.mind-map-details input');
+                    data.mindMap.defects = Array.from(inputs).map(input => input.value || "");
+                }
+                
+                const proceduresContainer = document.getElementById('procedures-container');
+                if (proceduresContainer) {
+                    const inputs = proceduresContainer.querySelectorAll('.mind-map-details input');
+                    data.mindMap.procedures = Array.from(inputs).map(input => input.value || "");
+                }
+                
+                // Scenarios data - with safety checks
+                const scenariosContainer = document.getElementById('scenarios-container');
+                if (scenariosContainer) {
+                    const scenarioDivs = scenariosContainer.querySelectorAll('.scenario');
+                    
+                    scenarioDivs.forEach((div, index) => {
+                        const scenario = {
+                            symptoms: "",
+                            causes: [],
+                            inspections: [],
+                            repairs: ""
+                        };
+                        
+                        // Get symptoms
+                        const symptomsTextarea = div.querySelector('textarea:nth-of-type(1)');
+                        if (symptomsTextarea) {
+                            scenario.symptoms = symptomsTextarea.value || "";
+                        }
+                        
+                        // Get causes
+                        const causesContainerId = `causes-container-${index+1}`;
+                        const causesContainer = document.getElementById(causesContainerId);
+                        if (causesContainer) {
+                            const causeInputs = causesContainer.querySelectorAll('input');
+                            scenario.causes = Array.from(causeInputs).map(input => input.value || "");
+                        }
+                        
+                        // Get inspection procedures
+                        const proceduresContainerId = `procedures-container-${index+1}`;
+                        const proceduresContainer = document.getElementById(proceduresContainerId);
+                        if (proceduresContainer) {
+                            const procedureInputs = proceduresContainer.querySelectorAll('input');
+                            scenario.inspections = Array.from(procedureInputs).map(input => input.value || "");
+                        }
+                        
+                        // Get repairs
+                        const repairsTextarea = div.querySelector('textarea:nth-of-type(2)');
+                        if (repairsTextarea) {
+                            scenario.repairs = repairsTextarea.value || "";
+                        }
+                        
+                        data.scenarios.push(scenario);
                     });
                 }
-            });
-            
-            const terminology = [];
-            const termRows = document.querySelectorAll('#terminology-container .key-term');
-            termRows.forEach(row => {
-                const inputs = row.querySelectorAll('input');
-                if (inputs[0].value || inputs[1].value) {
-                    terminology.push({
-                        term: inputs[0].value,
-                        definition: inputs[1].value
+                
+                // Visual reference guide data - with safety checks
+                const keyComponentsContainer = document.getElementById('key-components-container');
+                if (keyComponentsContainer) {
+                    const inputs = keyComponentsContainer.querySelectorAll('input');
+                    data.referenceGuide.keyComponents = Array.from(inputs).map(input => input.value || "");
+                }
+                
+                // Get diagram notes - safely
+                const diagramTextarea = document.querySelector('#part3 textarea');
+                if (diagramTextarea) {
+                    data.referenceGuide.diagramNotes = diagramTextarea.value || "";
+                }
+                
+                // Common defects - safely
+                const defectsListContainer = document.getElementById('defects-list-container');
+                if (defectsListContainer) {
+                    const defectRows = defectsListContainer.querySelectorAll('.key-term');
+                    defectRows.forEach(row => {
+                        const inputs = row.querySelectorAll('input');
+                        if (inputs && inputs.length >= 2) {
+                            data.referenceGuide.commonDefects.push({
+                                symptom: inputs[0].value || "",
+                                cause: inputs[1].value || ""
+                            });
+                        }
                     });
                 }
-            });
-            
-            const checklist = [];
-            const checkboxItems = document.querySelectorAll('#checklist-container .checkbox-item');
-            checkboxItems.forEach(item => {
-                const checked = item.querySelector('input[type="checkbox"]').checked;
-                const text = item.querySelector('input[type="text"]').value;
-                if (text) {
-                    checklist.push({
-                        done: checked,
-                        text: text
+                
+                // Terminology - safely
+                const terminologyContainer = document.getElementById('terminology-container');
+                if (terminologyContainer) {
+                    const termRows = terminologyContainer.querySelectorAll('.key-term');
+                    termRows.forEach(row => {
+                        const inputs = row.querySelectorAll('input');
+                        if (inputs && inputs.length >= 2) {
+                            data.referenceGuide.terminology.push({
+                                term: inputs[0].value || "",
+                                definition: inputs[1].value || ""
+                            });
+                        }
                     });
                 }
-            });
-            
-            // Knowledge sharing data
-            const keyPoints = Array.from(document.querySelectorAll('#part4 input[type="text"]')).map(input => input.value);
-            const steeringNotes = document.querySelector('#part4 textarea:nth-of-type(1)').value;
-            const suspensionNotes = document.querySelector('#part4 textarea:nth-of-type(2)').value;
-            const brakesNotes = document.querySelector('#part4 textarea:nth-of-type(3)').value;
-            const wheelsNotes = document.querySelector('#part4 textarea:nth-of-type(4)').value;
-            
-            // Self-assessment data
-            const ratings = {
-                steering: document.querySelector('#assessment select:nth-of-type(1)').value,
-                suspension: document.querySelector('#assessment select:nth-of-type(2)').value,
-                brakes: document.querySelector('#assessment select:nth-of-type(3)').value,
-                wheelsAndTyres: document.querySelector('#assessment select:nth-of-type(4)').value
-            };
-            
-            const priorities = Array.from(document.querySelectorAll('#priorities-container input')).map(input => input.value);
-            const additionalNotes = document.querySelector('#assessment textarea').value;
-            
-            // Add timestamp for auto-save recovery
-            return {
-                timestamp: new Date().getTime(),
-                system,
-                mindMap: {
-                    components,
-                    operations,
-                    advantages,
-                    defects,
-                    procedures
-                },
-                scenarios,
-                referenceGuide: {
-                    keyComponents,
-                    diagramNotes,
-                    commonDefects,
-                    terminology,
-                    checklist
-                },
-                knowledgeSharing: {
-                    keyPoints,
-                    steeringNotes,
-                    suspensionNotes,
-                    brakesNotes,
-                    wheelsNotes
-                },
-                assessment: {
-                    ratings,
-                    priorities,
-                    additionalNotes
+                
+                // Checklist - safely
+                const checklistContainer = document.getElementById('checklist-container');
+                if (checklistContainer) {
+                    const checkboxItems = checklistContainer.querySelectorAll('.checkbox-item');
+                    checkboxItems.forEach(item => {
+                        const checkbox = item.querySelector('input[type="checkbox"]');
+                        const text = item.querySelector('input[type="text"]');
+                        
+                        if (checkbox && text) {
+                            data.referenceGuide.checklist.push({
+                                done: checkbox.checked || false,
+                                text: text.value || ""
+                            });
+                        }
+                    });
                 }
-            };
+                
+                // Knowledge sharing data - safely
+                const part4 = document.getElementById('part4');
+                if (part4) {
+                    // Key points
+                    const keyPointInputs = part4.querySelectorAll('input[type="text"]');
+                    data.knowledgeSharing.keyPoints = Array.from(keyPointInputs).map(input => input.value || "");
+                    
+                    // Notes from presentations
+                    const textareas = part4.querySelectorAll('textarea');
+                    if (textareas.length >= 4) {
+                        data.knowledgeSharing.steeringNotes = textareas[0].value || "";
+                        data.knowledgeSharing.suspensionNotes = textareas[1].value || "";
+                        data.knowledgeSharing.brakesNotes = textareas[2].value || "";
+                        data.knowledgeSharing.wheelsNotes = textareas[3].value || "";
+                    }
+                }
+                
+                // Self-assessment data - safely
+                const assessment = document.getElementById('assessment');
+                if (assessment) {
+                    // Ratings
+                    const ratingSelects = assessment.querySelectorAll('select');
+                    if (ratingSelects.length >= 4) {
+                        data.assessment.ratings = {
+                            steering: ratingSelects[0].value || "1",
+                            suspension: ratingSelects[1].value || "1",
+                            brakes: ratingSelects[2].value || "1", 
+                            wheelsAndTyres: ratingSelects[3].value || "1"
+                        };
+                    }
+                    
+                    // Priorities
+                    const prioritiesContainer = document.getElementById('priorities-container');
+                    if (prioritiesContainer) {
+                        const inputs = prioritiesContainer.querySelectorAll('input');
+                        data.assessment.priorities = Array.from(inputs).map(input => input.value || "");
+                    }
+                    
+                    // Additional notes
+                    const additionalNotesTextarea = assessment.querySelector('textarea');
+                    if (additionalNotesTextarea) {
+                        data.assessment.additionalNotes = additionalNotesTextarea.value || "";
+                    }
+                }
+                
+                return data;
+            } catch (error) {
+                console.error("Error in gatherAllData:", error);
+                showToast("Error gathering form data", "error");
+                throw error; // Re-throw to handle in the calling function
+            }
         }
         
         // Generate formatted text summary
         function generateSummaryText(data) {
-            const summary = [];
-            
-            // Header
-            summary.push("# CHASSIS SYSTEMS REVISION SUMMARY");
-            summary.push(`## ${data.system || "Not specified"} System\n`);
-            
-            // Mind Map
-            summary.push("## KNOWLEDGE ORGANIZATION");
-            
-            summary.push("### Components:");
-            data.mindMap.components.forEach(item => {
-                if (item) summary.push(`- ${item}`);
-            });
-            
-            summary.push("\n### Operation Principles:");
-            data.mindMap.operations.forEach(item => {
-                if (item) summary.push(`- ${item}`);
-            });
-            
-            summary.push("\n### Advantages:");
-            data.mindMap.advantages.forEach(item => {
-                if (item) summary.push(`- ${item}`);
-            });
-            
-            summary.push("\n### Common Defects:");
-            data.mindMap.defects.forEach(item => {
-                if (item) summary.push(`- ${item}`);
-            });
-            
-            summary.push("\n### Inspection Procedures:");
-            data.mindMap.procedures.forEach(item => {
-                if (item) summary.push(`- ${item}`);
-            });
-            
-            // Scenarios
-            summary.push("\n\n## DIAGNOSTIC SCENARIOS");
-            
-            data.scenarios.forEach((scenario, index) => {
-                summary.push(`\n### Scenario ${index + 1}:`);
-                summary.push(`Vehicle Symptoms: ${scenario.symptoms || "Not specified"}`);
+            try {
+                const summary = [];
                 
-                summary.push("\nPossible Causes:");
-                scenario.causes.forEach(cause => {
-                    if (cause) summary.push(`- ${cause}`);
-                });
+                // Header
+                summary.push("# CHASSIS SYSTEMS REVISION SUMMARY");
+                summary.push(`## ${data.system || "Not specified"} System\n`);
                 
-                summary.push("\nInspection Procedures:");
-                scenario.inspections.forEach(procedure => {
-                    if (procedure) summary.push(`- ${procedure}`);
-                });
+                // Mind Map
+                summary.push("## KNOWLEDGE ORGANIZATION");
                 
-                summary.push(`\nRecommended Repairs: ${scenario.repairs || "Not specified"}`);
-            });
-            
-            // Visual Reference Guide
-            summary.push("\n\n## VISUAL REFERENCE GUIDE");
-            
-            summary.push("\n### Key Components:");
-            data.referenceGuide.keyComponents.forEach(component => {
-                if (component) summary.push(`- ${component}`);
-            });
-            
-            summary.push(`\n### Component Diagram Notes:\n${data.referenceGuide.diagramNotes || "No notes provided"}`);
-            
-            summary.push("\n### Common Defects:");
-            data.referenceGuide.commonDefects.forEach(defect => {
-                if (defect.symptom || defect.cause) {
-                    summary.push(`- Symptom: ${defect.symptom || "Not specified"} | Cause: ${defect.cause || "Not specified"}`);
+                summary.push("### Components:");
+                if (data.mindMap && data.mindMap.components) {
+                    data.mindMap.components.forEach(item => {
+                        if (item) summary.push(`- ${item}`);
+                    });
                 }
-            });
-            
-            summary.push("\n### Key Terminology:");
-            data.referenceGuide.terminology.forEach(term => {
-                if (term.term || term.definition) {
-                    summary.push(`- ${term.term || "Term"}: ${term.definition || "No definition provided"}`);
+                
+                summary.push("\n### Operation Principles:");
+                if (data.mindMap && data.mindMap.operations) {
+                    data.mindMap.operations.forEach(item => {
+                        if (item) summary.push(`- ${item}`);
+                    });
                 }
-            });
-            
-            summary.push("\n### Inspection Checklist:");
-            data.referenceGuide.checklist.forEach(item => {
-                if (item.text) {
-                    summary.push(`- [${item.done ? "X" : " "}] ${item.text}`);
+                
+                summary.push("\n### Advantages:");
+                if (data.mindMap && data.mindMap.advantages) {
+                    data.mindMap.advantages.forEach(item => {
+                        if (item) summary.push(`- ${item}`);
+                    });
                 }
-            });
-            
-            // Knowledge Sharing
-            summary.push("\n\n## KNOWLEDGE SHARING");
-            
-            summary.push("\n### Key Points to Share:");
-            data.knowledgeSharing.keyPoints.forEach(point => {
-                if (point) summary.push(`- ${point}`);
-            });
-            
-            summary.push(`\n### Steering System Notes:\n${data.knowledgeSharing.steeringNotes || "No notes provided"}`);
-            summary.push(`\n### Suspension System Notes:\n${data.knowledgeSharing.suspensionNotes || "No notes provided"}`);
-            summary.push(`\n### Braking System Notes:\n${data.knowledgeSharing.brakesNotes || "No notes provided"}`);
-            summary.push(`\n### Wheels and Tyres Notes:\n${data.knowledgeSharing.wheelsNotes || "No notes provided"}`);
-            
-            // Self-Assessment
-            summary.push("\n\n## SELF-ASSESSMENT");
-            
-            summary.push("\n### Confidence Ratings (1-5):");
-            summary.push(`- Steering: ${data.assessment.ratings.steering}/5`);
-            summary.push(`- Suspension: ${data.assessment.ratings.suspension}/5`);
-            summary.push(`- Brakes: ${data.assessment.ratings.brakes}/5`);
-            summary.push(`- Wheels & Tyres: ${data.assessment.ratings.wheelsAndTyres}/5`);
-            
-            summary.push("\n### Revision Priorities:");
-            data.assessment.priorities.forEach(priority => {
-                if (priority) summary.push(`- ${priority}`);
-            });
-            
-            summary.push(`\n### Additional Notes:\n${data.assessment.additionalNotes || "No additional notes"}`);
-            
-            return summary.join('\n');
+                
+                summary.push("\n### Common Defects:");
+                if (data.mindMap && data.mindMap.defects) {
+                    data.mindMap.defects.forEach(item => {
+                        if (item) summary.push(`- ${item}`);
+                    });
+                }
+                
+                summary.push("\n### Inspection Procedures:");
+                if (data.mindMap && data.mindMap.procedures) {
+                    data.mindMap.procedures.forEach(item => {
+                        if (item) summary.push(`- ${item}`);
+                    });
+                }
+                
+                // Scenarios
+                summary.push("\n\n## DIAGNOSTIC SCENARIOS");
+                
+                if (data.scenarios && data.scenarios.length) {
+                    data.scenarios.forEach((scenario, index) => {
+                        summary.push(`\n### Scenario ${index + 1}:`);
+                        summary.push(`Vehicle Symptoms: ${scenario.symptoms || "Not specified"}`);
+                        
+                        summary.push("\nPossible Causes:");
+                        if (scenario.causes && scenario.causes.length) {
+                            scenario.causes.forEach(cause => {
+                                if (cause) summary.push(`- ${cause}`);
+                            });
+                        }
+                        
+                        summary.push("\nInspection Procedures:");
+                        if (scenario.inspections && scenario.inspections.length) {
+                            scenario.inspections.forEach(procedure => {
+                                if (procedure) summary.push(`- ${procedure}`);
+                            });
+                        }
+                        
+                        summary.push(`\nRecommended Repairs: ${scenario.repairs || "Not specified"}`);
+                    });
+                }
+                
+                // Visual Reference Guide
+                summary.push("\n\n## VISUAL REFERENCE GUIDE");
+                
+                summary.push("\n### Key Components:");
+                if (data.referenceGuide && data.referenceGuide.keyComponents) {
+                    data.referenceGuide.keyComponents.forEach(component => {
+                        if (component) summary.push(`- ${component}`);
+                    });
+                }
+                
+                summary.push(`\n### Component Diagram Notes:\n${data.referenceGuide && data.referenceGuide.diagramNotes ? data.referenceGuide.diagramNotes : "No notes provided"}`);
+                
+                summary.push("\n### Common Defects:");
+                if (data.referenceGuide && data.referenceGuide.commonDefects) {
+                    data.referenceGuide.commonDefects.forEach(defect => {
+                        if (defect.symptom || defect.cause) {
+                            summary.push(`- Symptom: ${defect.symptom || "Not specified"} | Cause: ${defect.cause || "Not specified"}`);
+                        }
+                    });
+                }
+                
+                summary.push("\n### Key Terminology:");
+                if (data.referenceGuide && data.referenceGuide.terminology) {
+                    data.referenceGuide.terminology.forEach(term => {
+                        if (term.term || term.definition) {
+                            summary.push(`- ${term.term || "Term"}: ${term.definition || "No definition provided"}`);
+                        }
+                    });
+                }
+                
+                summary.push("\n### Inspection Checklist:");
+                if (data.referenceGuide && data.referenceGuide.checklist) {
+                    data.referenceGuide.checklist.forEach(item => {
+                        if (item.text) {
+                            summary.push(`- [${item.done ? "X" : " "}] ${item.text}`);
+                        }
+                    });
+                }
+                
+                // Knowledge Sharing
+                summary.push("\n\n## KNOWLEDGE SHARING");
+                
+                summary.push("\n### Key Points to Share:");
+                if (data.knowledgeSharing && data.knowledgeSharing.keyPoints) {
+                    data.knowledgeSharing.keyPoints.forEach(point => {
+                        if (point) summary.push(`- ${point}`);
+                    });
+                }
+                
+                if (data.knowledgeSharing) {
+                    summary.push(`\n### Steering System Notes:\n${data.knowledgeSharing.steeringNotes || "No notes provided"}`);
+                    summary.push(`\n### Suspension System Notes:\n${data.knowledgeSharing.suspensionNotes || "No notes provided"}`);
+                    summary.push(`\n### Braking System Notes:\n${data.knowledgeSharing.brakesNotes || "No notes provided"}`);
+                    summary.push(`\n### Wheels and Tyres Notes:\n${data.knowledgeSharing.wheelsNotes || "No notes provided"}`);
+                }
+                
+                // Self-Assessment
+                summary.push("\n\n## SELF-ASSESSMENT");
+                
+                if (data.assessment && data.assessment.ratings) {
+                    summary.push("\n### Confidence Ratings (1-5):");
+                    summary.push(`- Steering: ${data.assessment.ratings.steering || "1"}/5`);
+                    summary.push(`- Suspension: ${data.assessment.ratings.suspension || "1"}/5`);
+                    summary.push(`- Brakes: ${data.assessment.ratings.brakes || "1"}/5`);
+                    summary.push(`- Wheels & Tyres: ${data.assessment.ratings.wheelsAndTyres || "1"}/5`);
+                }
+                
+                summary.push("\n### Revision Priorities:");
+                if (data.assessment && data.assessment.priorities) {
+                    data.assessment.priorities.forEach(priority => {
+                        if (priority) summary.push(`- ${priority}`);
+                    });
+                }
+                
+                summary.push(`\n### Additional Notes:\n${data.assessment && data.assessment.additionalNotes ? data.assessment.additionalNotes : "No additional notes"}`);
+                
+                return summary.join('\n');
+            } catch (error) {
+                console.error("Error generating summary text:", error);
+                showToast("Error generating summary", "error");
+                return "Error generating summary. Please try again or contact support.";
+            }
         }
         
         // Full implementation of restore data function
         function restoreData(data) {
-            // Restore system selection
-            if (data.system) {
-                const systemSelect = document.getElementById('system-select');
-                systemSelect.value = data.system;
-                
-                // Update the system display spans
-                const displays = document.querySelectorAll('#selected-system-display');
-                displays.forEach(display => {
-                    display.textContent = data.system;
-                });
-            }
-            
-            // Restore Mind Map data
-            restoreInputArray('#components-container', data.mindMap.components);
-            restoreInputArray('#operation-container', data.mindMap.operations);
-            restoreInputArray('#advantages-container', data.mindMap.advantages);
-            restoreInputArray('#defects-container', data.mindMap.defects);
-            restoreInputArray('#procedures-container', data.mindMap.procedures);
-            
-            // Restore Scenarios data
-            if (data.scenarios && data.scenarios.length > 0) {
-                // Clear existing scenarios except the first one
-                const scenariosContainer = document.getElementById('scenarios-container');
-                while (scenariosContainer.children.length > 1) {
-                    scenariosContainer.removeChild(scenariosContainer.lastChild);
-                }
-                
-                // Restore first scenario
-                let firstScenario = scenariosContainer.querySelector('.scenario');
-                if (firstScenario && data.scenarios[0]) {
-                    firstScenario.querySelector('textarea:nth-of-type(1)').value = data.scenarios[0].symptoms || '';
-                    restoreInputArray('#causes-container-1', data.scenarios[0].causes);
-                    restoreInputArray('#procedures-container-1', data.scenarios[0].inspections);
-                    firstScenario.querySelector('textarea:nth-of-type(2)').value = data.scenarios[0].repairs || '';
-                }
-                
-                // Create and restore additional scenarios
-                for (let i = 1; i < data.scenarios.length; i++) {
-                    addScenario(); // This adds a new scenario to the DOM
+            try {
+                // Restore system selection
+                if (data.system) {
+                    const systemSelect = document.getElementById('system-select');
+                    if (systemSelect) {
+                        systemSelect.value = data.system;
                     
-                    // Get the newly added scenario and populate it
-                    const newScenario = scenariosContainer.lastChild;
-                    newScenario.querySelector('textarea:nth-of-type(1)').value = data.scenarios[i].symptoms || '';
-                    
-                    const causesContainerId = `causes-container-${i+1}`;
-                    const proceduresContainerId = `procedures-container-${i+1}`;
-                    
-                    // Create cause and procedure items if needed
-                    ensureItemsExist(causesContainerId, data.scenarios[i].causes.length, addCauseItem);
-                    ensureItemsExist(proceduresContainerId, data.scenarios[i].inspections.length, addProcedureItem);
-                    
-                    // Restore values
-                    restoreInputArray(`#${causesContainerId}`, data.scenarios[i].causes);
-                    restoreInputArray(`#${proceduresContainerId}`, data.scenarios[i].inspections);
-                    
-                    newScenario.querySelector('textarea:nth-of-type(2)').value = data.scenarios[i].repairs || '';
-                }
-            }
-            
-            // Restore Visual Reference Guide data
-            restoreInputArray('#key-components-container', data.referenceGuide.keyComponents);
-            document.querySelector('#part3 textarea:nth-of-type(1)').value = data.referenceGuide.diagramNotes || '';
-            
-            // Restore Common Defects
-            if (data.referenceGuide.commonDefects && data.referenceGuide.commonDefects.length > 0) {
-                const defectsContainer = document.getElementById('defects-list-container');
-                
-                // Ensure we have enough key-term divs
-                while (defectsContainer.children.length < data.referenceGuide.commonDefects.length) {
-                    addDefect();
-                }
-                
-                // Populate values
-                const defectRows = defectsContainer.querySelectorAll('.key-term');
-                data.referenceGuide.commonDefects.forEach((defect, index) => {
-                    if (index < defectRows.length) {
-                        const inputs = defectRows[index].querySelectorAll('input');
-                        inputs[0].value = defect.symptom || '';
-                        inputs[1].value = defect.cause || '';
+                        // Update the system display spans
+                        const displays = document.querySelectorAll('#selected-system-display');
+                        displays.forEach(display => {
+                            display.textContent = data.system;
+                        });
                     }
-                });
-            }
-            
-            // Restore Terminology
-            if (data.referenceGuide.terminology && data.referenceGuide.terminology.length > 0) {
-                const terminologyContainer = document.getElementById('terminology-container');
-                
-                // Ensure we have enough key-term divs
-                while (terminologyContainer.children.length < data.referenceGuide.terminology.length) {
-                    addTerm();
                 }
                 
-                // Populate values
-                const termRows = terminologyContainer.querySelectorAll('.key-term');
-                data.referenceGuide.terminology.forEach((term, index) => {
-                    if (index < termRows.length) {
-                        const inputs = termRows[index].querySelectorAll('input');
-                        inputs[0].value = term.term || '';
-                        inputs[1].value = term.definition || '';
+                // Restore Mind Map data
+                if (data.mindMap) {
+                    restoreInputArray('#components-container', data.mindMap.components);
+                    restoreInputArray('#operation-container', data.mindMap.operations);
+                    restoreInputArray('#advantages-container', data.mindMap.advantages);
+                    restoreInputArray('#defects-container', data.mindMap.defects);
+                    restoreInputArray('#procedures-container', data.mindMap.procedures);
+                }
+                
+                // Restore Scenarios data
+                if (data.scenarios && data.scenarios.length > 0) {
+                    // Clear existing scenarios except the first one
+                    const scenariosContainer = document.getElementById('scenarios-container');
+                    if (scenariosContainer) {
+                        while (scenariosContainer.children.length > 1) {
+                            scenariosContainer.removeChild(scenariosContainer.lastChild);
+                        }
+                        
+                        // Restore first scenario
+                        let firstScenario = scenariosContainer.querySelector('.scenario');
+                        if (firstScenario && data.scenarios[0]) {
+                            const firstSymptomsTextarea = firstScenario.querySelector('textarea:nth-of-type(1)');
+                            if (firstSymptomsTextarea) {
+                                firstSymptomsTextarea.value = data.scenarios[0].symptoms || '';
+                            }
+                            
+                            restoreInputArray('#causes-container-1', data.scenarios[0].causes);
+                            restoreInputArray('#procedures-container-1', data.scenarios[0].inspections);
+                            
+                            const firstRepairsTextarea = firstScenario.querySelector('textarea:nth-of-type(2)');
+                            if (firstRepairsTextarea) {
+                                firstRepairsTextarea.value = data.scenarios[0].repairs || '';
+                            }
+                        }
+                        
+                        // Create and restore additional scenarios
+                        for (let i = 1; i < data.scenarios.length; i++) {
+                            addScenario(); // This adds a new scenario to the DOM
+                            
+                            // Get the newly added scenario and populate it
+                            const newScenario = scenariosContainer.lastChild;
+                            if (newScenario) {
+                                const symptomsTextarea = newScenario.querySelector('textarea:nth-of-type(1)');
+                                if (symptomsTextarea) {
+                                    symptomsTextarea.value = data.scenarios[i].symptoms || '';
+                                }
+                                
+                                const causesContainerId = `causes-container-${i+1}`;
+                                const proceduresContainerId = `procedures-container-${i+1}`;
+                                
+                                // Create cause and procedure items if needed
+                                ensureItemsExist(causesContainerId, data.scenarios[i].causes.length, addCauseItem);
+                                ensureItemsExist(proceduresContainerId, data.scenarios[i].inspections.length, addProcedureItem);
+                                
+                                // Restore values
+                                restoreInputArray(`#${causesContainerId}`, data.scenarios[i].causes);
+                                restoreInputArray(`#${proceduresContainerId}`, data.scenarios[i].inspections);
+                                
+                                const repairsTextarea = newScenario.querySelector('textarea:nth-of-type(2)');
+                                if (repairsTextarea) {
+                                    repairsTextarea.value = data.scenarios[i].repairs || '';
+                                }
+                            }
+                        }
                     }
-                });
-            }
-            
-            // Restore Checklist
-            if (data.referenceGuide.checklist && data.referenceGuide.checklist.length > 0) {
-                const checklistContainer = document.getElementById('checklist-container');
-                
-                // Ensure we have enough checkbox items
-                while (checklistContainer.children.length < data.referenceGuide.checklist.length) {
-                    addChecklistItem();
                 }
                 
-                // Populate values
-                const checkboxItems = checklistContainer.querySelectorAll('.checkbox-item');
-                data.referenceGuide.checklist.forEach((item, index) => {
-                    if (index < checkboxItems.length) {
-                        checkboxItems[index].querySelector('input[type="checkbox"]').checked = item.done || false;
-                        checkboxItems[index].querySelector('input[type="text"]').value = item.text || '';
+                // Restore Visual Reference Guide data
+                if (data.referenceGuide) {
+                    restoreInputArray('#key-components-container', data.referenceGuide.keyComponents);
+                    
+                    const diagramTextarea = document.querySelector('#part3 textarea:nth-of-type(1)');
+                    if (diagramTextarea && data.referenceGuide.diagramNotes) {
+                        diagramTextarea.value = data.referenceGuide.diagramNotes || '';
                     }
-                });
-            }
-            
-            // Restore Knowledge Sharing data
-            const keyPointInputs = document.querySelectorAll('#part4 input[type="text"]');
-            data.knowledgeSharing.keyPoints.forEach((point, index) => {
-                if (index < keyPointInputs.length) {
-                    keyPointInputs[index].value = point || '';
+                    
+                    // Restore Common Defects
+                    if (data.referenceGuide.commonDefects && data.referenceGuide.commonDefects.length > 0) {
+                        const defectsContainer = document.getElementById('defects-list-container');
+                        if (defectsContainer) {
+                            // Ensure we have enough key-term divs
+                            while (defectsContainer.children.length < data.referenceGuide.commonDefects.length) {
+                                addDefect();
+                            }
+                            
+                            // Populate values
+                            const defectRows = defectsContainer.querySelectorAll('.key-term');
+                            data.referenceGuide.commonDefects.forEach((defect, index) => {
+                                if (index < defectRows.length) {
+                                    const inputs = defectRows[index].querySelectorAll('input');
+                                    if (inputs.length >= 2) {
+                                        inputs[0].value = defect.symptom || '';
+                                        inputs[1].value = defect.cause || '';
+                                    }
+                                }
+                            });
+                        }
+                    }
+                    
+                    // Restore Terminology
+                    if (data.referenceGuide.terminology && data.referenceGuide.terminology.length > 0) {
+                        const terminologyContainer = document.getElementById('terminology-container');
+                        if (terminologyContainer) {
+                            // Ensure we have enough key-term divs
+                            while (terminologyContainer.children.length < data.referenceGuide.terminology.length) {
+                                addTerm();
+                            }
+                            
+                            // Populate values
+                            const termRows = terminologyContainer.querySelectorAll('.key-term');
+                            data.referenceGuide.terminology.forEach((term, index) => {
+                                if (index < termRows.length) {
+                                    const inputs = termRows[index].querySelectorAll('input');
+                                    if (inputs.length >= 2) {
+                                        inputs[0].value = term.term || '';
+                                        inputs[1].value = term.definition || '';
+                                    }
+                                }
+                            });
+                        }
+                    }
+                    
+                    // Restore Checklist
+                    if (data.referenceGuide.checklist && data.referenceGuide.checklist.length > 0) {
+                        const checklistContainer = document.getElementById('checklist-container');
+                        if (checklistContainer) {
+                            // Ensure we have enough checkbox items
+                            while (checklistContainer.children.length < data.referenceGuide.checklist.length) {
+                                addChecklistItem();
+                            }
+                            
+                            // Populate values
+                            const checkboxItems = checklistContainer.querySelectorAll('.checkbox-item');
+                            data.referenceGuide.checklist.forEach((item, index) => {
+                                if (index < checkboxItems.length) {
+                                    const checkbox = checkboxItems[index].querySelector('input[type="checkbox"]');
+                                    const text = checkboxItems[index].querySelector('input[type="text"]');
+                                    
+                                    if (checkbox && text) {
+                                        checkbox.checked = item.done || false;
+                                        text.value = item.text || '';
+                                    }
+                                }
+                            });
+                        }
+                    }
                 }
-            });
-            
-            const part4Textareas = document.querySelectorAll('#part4 textarea');
-            if (part4Textareas.length >= 4) {
-                part4Textareas[0].value = data.knowledgeSharing.steeringNotes || '';
-                part4Textareas[1].value = data.knowledgeSharing.suspensionNotes || '';
-                part4Textareas[2].value = data.knowledgeSharing.brakesNotes || '';
-                part4Textareas[3].value = data.knowledgeSharing.wheelsNotes || '';
-            }
-            
-            // Restore Self-Assessment data
-            const ratingSelects = document.querySelectorAll('#assessment select');
-            if (ratingSelects.length >= 4) {
-                ratingSelects[0].value = data.assessment.ratings.steering || '1';
-                ratingSelects[1].value = data.assessment.ratings.suspension || '1';
-                ratingSelects[2].value = data.assessment.ratings.brakes || '1';
-                ratingSelects[3].value = data.assessment.ratings.wheelsAndTyres || '1';
-            }
-            
-            restoreInputArray('#priorities-container', data.assessment.priorities);
-            document.querySelector('#assessment textarea').value = data.assessment.additionalNotes || '';
-            
-            // Reset unsaved changes flag since we just restored
-            unsavedChanges = false;
-            
-            // Update last saved text
-            if (data.timestamp) {
-                const lastSavedDate = new Date(data.timestamp);
-                const lastSavedText = document.getElementById('last-saved-text');
-                if (lastSavedText) {
-                    lastSavedText.textContent = `Last saved: ${lastSavedDate.toLocaleTimeString()}`;
+                
+                // Restore Knowledge Sharing data
+                if (data.knowledgeSharing) {
+                    const part4 = document.getElementById('part4');
+                    if (part4) {
+                        const keyPointInputs = part4.querySelectorAll('input[type="text"]');
+                        if (keyPointInputs.length > 0 && data.knowledgeSharing.keyPoints) {
+                            data.knowledgeSharing.keyPoints.forEach((point, index) => {
+                                if (index < keyPointInputs.length) {
+                                    keyPointInputs[index].value = point || '';
+                                }
+                            });
+                        }
+                        
+                        const part4Textareas = part4.querySelectorAll('textarea');
+                        if (part4Textareas.length >= 4) {
+                            part4Textareas[0].value = data.knowledgeSharing.steeringNotes || '';
+                            part4Textareas[1].value = data.knowledgeSharing.suspensionNotes || '';
+                            part4Textareas[2].value = data.knowledgeSharing.brakesNotes || '';
+                            part4Textareas[3].value = data.knowledgeSharing.wheelsNotes || '';
+                        }
+                    }
                 }
+                
+                // Restore Self-Assessment data
+                if (data.assessment) {
+                    const assessment = document.getElementById('assessment');
+                    if (assessment) {
+                        const ratingSelects = assessment.querySelectorAll('select');
+                        if (ratingSelects.length >= 4 && data.assessment.ratings) {
+                            ratingSelects[0].value = data.assessment.ratings.steering || '1';
+                            ratingSelects[1].value = data.assessment.ratings.suspension || '1';
+                            ratingSelects[2].value = data.assessment.ratings.brakes || '1';
+                            ratingSelects[3].value = data.assessment.ratings.wheelsAndTyres || '1';
+                        }
+                        
+                        restoreInputArray('#priorities-container', data.assessment.priorities);
+                        
+                        const additionalNotesTextarea = assessment.querySelector('textarea');
+                        if (additionalNotesTextarea && data.assessment.additionalNotes) {
+                            additionalNotesTextarea.value = data.assessment.additionalNotes || '';
+                        }
+                    }
+                }
+                
+                // Reset unsaved changes flag since we just restored
+                unsavedChanges = false;
+                
+                // Update last saved text
+                if (data.timestamp) {
+                    const lastSavedDate = new Date(data.timestamp);
+                    const lastSavedText = document.getElementById('last-saved-text');
+                    if (lastSavedText) {
+                        lastSavedText.textContent = `Last saved: ${lastSavedDate.toLocaleTimeString()}`;
+                    }
+                }
+                
+                showToast('Your work has been restored', 'success');
+                return true;
+            } catch (error) {
+                console.error("Error restoring data:", error);
+                showToast("Error restoring your data", "error");
+                return false;
             }
-            
-            updateSaveIndicator('Your work has been restored');
         }
         
         // Helper function to restore values to an array of input fields in a container
@@ -1652,6 +2047,7 @@
             
             // Check if container has a mind-map-details div for mind map items
             const inputContainer = container.querySelector('.mind-map-details') || container;
+            if (!inputContainer) return;
             
             // Get all inputs in the container
             let inputs = inputContainer.querySelectorAll('input[type="text"]');
@@ -1748,28 +2144,38 @@
             // Setup change tracking
             setupChangeTracking();
             
-            // Set up auto-save timer (every 1 minute)
-            autoSaveIntervalId = setInterval(autoSave, 60000); // 1 minute
+            // Set up auto-save timer (every 2 minutes)
+            autoSaveIntervalId = setInterval(autoSave, 120000); // 2 minutes
             
             // Load saved data if it exists
             try {
                 const savedData = localStorage.getItem('chassisWorksheet');
                 if (savedData) {
-                    const parsedData = JSON.parse(savedData);
-                    const lastSavedDate = new Date(parsedData.timestamp || 0);
-                    
-                    // Format the date for display
-                    const formattedDate = lastSavedDate.toLocaleString();
-                    
-                    const shouldRestore = confirm(`Found a previously saved session from ${formattedDate}. Would you like to restore your work?`);
-                    if (shouldRestore) {
-                        restoreData(parsedData);
+                    try {
+                        const parsedData = JSON.parse(savedData);
+                        const lastSavedDate = new Date(parsedData.timestamp || 0);
+                        
+                        // Format the date for display
+                        const formattedDate = lastSavedDate.toLocaleString();
+                        
+                        const shouldRestore = confirm(`Found a previously saved session from ${formattedDate}. Would you like to restore your work?`);
+                        if (shouldRestore) {
+                            restoreData(parsedData);
+                        }
+                    } catch (parseError) {
+                        console.error("Error parsing saved data:", parseError);
+                        showToast("Error loading previous session", "error");
                     }
                 }
             } catch (e) {
                 console.error("Error loading saved data:", e);
-                updateSaveIndicator('Error loading saved data', false);
+                showToast("Error accessing saved data", "error");
             }
+            
+            // Show welcome message
+            setTimeout(() => {
+                showToast("Welcome to Chassis Systems Revision Guide", "success", 4000);
+            }, 1000);
         };
     </script>
 </body>
