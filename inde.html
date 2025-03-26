@@ -262,37 +262,45 @@
             z-index: 10;
         }
         
+
+        /* New Tap-to-Match Styling */
         .drag-items {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
             gap: 10px;
             margin-bottom: 20px;
-            position: relative; /* For absolute positioning of dragging items */
         }
         
         .drag-item {
-            padding: 15px; /* Increased padding for better touch targets */
+            padding: 15px;
             background-color: var(--secondary);
             color: white;
             border-radius: 5px;
             user-select: none;
-            display: inline-block;
-            touch-action: none; /* Prevent browser handling of touch events */
             text-align: center;
-            transition: opacity 0.3s;
             margin: 5px;
-            cursor: grab;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;
+            position: relative;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         
-        .drag-item.dragging {
+        .drag-item.selected {
+            background-color: var(--accent);
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(243, 156, 18, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(243, 156, 18, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(243, 156, 18, 0); }
+        }
+        
+        .drag-item.placed {
             opacity: 0.6;
-        }
-        
-        .drag-item.touch-dragging {
-            position: absolute;
-            z-index: 1000;
-            opacity: 0.8;
             pointer-events: none;
         }
         
@@ -304,22 +312,48 @@
         
         .drop-zone {
             padding: 15px;
-            min-height: 70px; /* Increased height for better touch targets */
+            min-height: 70px;
             border: 2px dashed #ddd;
             border-radius: 5px;
-            transition: background-color 0.3s, border-color 0.3s;
+            transition: all 0.3s;
             display: flex;
             align-items: center;
             background-color: white;
+            position: relative;
         }
         
         .drop-zone.highlight {
-            background-color: rgba(42, 122, 189, 0.1);
+            background-color: rgba(42, 122, 189, 0.15);
             border-color: var(--secondary);
+            border-style: solid;
         }
         
-        .drop-zone .drag-item {
+        .drop-zone.correct {
+            background-color: rgba(39, 174, 96, 0.1);
+            border-color: var(--correct);
+            border-style: solid;
+        }
+        
+        .drop-zone.incorrect {
+            background-color: rgba(231, 76, 60, 0.1);
+            border-color: var(--wrong);
+            border-style: solid;
+            animation: shake 0.5s;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        
+        .drop-zone .matched-item {
             margin-left: 10px;
+            background-color: var(--secondary);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            display: inline-block;
         }
         
         .flashcard {
@@ -1233,228 +1267,124 @@
             });
         });
         
-        // COMPLETELY REVISED MOBILE-FRIENDLY DRAG AND DROP
+        // COMPLETELY REDESIGNED: TAP-TO-MATCH FUNCTIONALITY FOR MOBILE
         document.addEventListener('DOMContentLoaded', function() {
             const dragItems = document.querySelectorAll('.drag-item');
             const dropZones = document.querySelectorAll('.drop-zone');
+            let selectedItem = null;
             
-            // Variables to track the current dragged element
-            let currentDragItem = null;
-            let dragItemClone = null;
-            let initialX, initialY, currentX, currentY, xOffset, yOffset;
+            // Initialize instructions for mobile users
+            const dragDropContainer = document.querySelector('.drag-drop-container');
+            const instructionsElement = document.createElement('div');
+            instructionsElement.innerHTML = '<p style="text-align:center;padding:10px;background:#f9f9f9;margin-bottom:15px;border-radius:5px;"><strong>Instructions:</strong> Tap a component to select it, then tap a description to match them.</p>';
+            dragDropContainer.insertBefore(instructionsElement, dragDropContainer.firstChild.nextSibling);
             
-            // Initialize the drag items
+            // Set up the tap-to-select functionality for drag items
             dragItems.forEach(item => {
-                // Make all drag items draggable
-                item.setAttribute('draggable', 'true');
+                item.addEventListener('click', selectItem);
+                item.addEventListener('touchstart', function(e) {
+                    // Prevent default only for touch to avoid scrolling issues
+                    e.preventDefault();
+                }, { passive: false });
                 
-                // Traditional mouse events for desktop
-                item.addEventListener('dragstart', dragStart);
-                item.addEventListener('dragend', dragEnd);
-                
-                // Touch events for mobile
-                item.addEventListener('touchstart', touchStart, { passive: false });
-                
-                // Track if an item is already placed
-                item.dataset.placed = 'false';
+                item.addEventListener('touchend', function(e) {
+                    e.preventDefault();
+                    selectItem.call(this, e);
+                }, { passive: false });
             });
             
-            // Initialize drop zones
+            // Set up tap-to-place functionality for drop zones
             dropZones.forEach(zone => {
-                zone.addEventListener('dragover', dragOver);
-                zone.addEventListener('dragleave', dragLeave);
-                zone.addEventListener('drop', drop);
-                
-                // Touch events
-                zone.addEventListener('touchmove', touchOver, { passive: false });
-                zone.addEventListener('touchend', touchDrop, { passive: false });
+                zone.addEventListener('click', placeItem);
+                zone.addEventListener('touchend', function(e) {
+                    e.preventDefault();
+                    placeItem.call(this, e);
+                }, { passive: false });
             });
             
-            // Add document-level touch event listeners
-            document.addEventListener('touchmove', touchMove, { passive: false });
-            document.addEventListener('touchend', touchEnd, { passive: false });
-            
-            // Mouse drag functions
-            function dragStart(e) {
-                if (this.dataset.placed === 'true') return;
+            // Function to handle selecting an item
+            function selectItem(e) {
+                // If this item is already placed, do nothing
+                if (this.classList.contains('placed')) {
+                    return;
+                }
                 
-                currentDragItem = this;
-                e.dataTransfer.setData('text/plain', this.dataset.component);
-                setTimeout(() => this.classList.add('dragging'), 0);
-            }
-            
-            function dragEnd() {
-                this.classList.remove('dragging');
-                currentDragItem = null;
-            }
-            
-            function dragOver(e) {
-                e.preventDefault();
-                this.classList.add('highlight');
-            }
-            
-            function dragLeave() {
-                this.classList.remove('highlight');
-            }
-            
-            function drop(e) {
-                e.preventDefault();
-                this.classList.remove('highlight');
+                // Provide feedback on tap
+                if (navigator.vibrate) {
+                    navigator.vibrate(50);
+                }
                 
-                if (!currentDragItem) return;
+                // Clear previous selection
+                dragItems.forEach(item => item.classList.remove('selected'));
                 
-                const dragComponent = e.dataTransfer.getData('text/plain');
-                const targetComponent = this.dataset.target;
+                // Select this item
+                this.classList.add('selected');
+                selectedItem = this;
                 
-                handleDrop(this, currentDragItem, dragComponent, targetComponent);
-            }
-            
-            // Touch drag functions
-            function touchStart(e) {
-                if (this.dataset.placed === 'true') return;
-                
-                // Prevent default to avoid scrolling
-                e.preventDefault();
-                
-                currentDragItem = this;
-                
-                // Create a clone for visual dragging
-                dragItemClone = this.cloneNode(true);
-                dragItemClone.classList.add('touch-dragging');
-                document.body.appendChild(dragItemClone);
-                
-                // Get initial touch position
-                const touch = e.touches[0];
-                initialX = touch.clientX;
-                initialY = touch.clientY;
-                
-                // Calculate offset from the top-left of the element
-                const rect = this.getBoundingClientRect();
-                xOffset = initialX - rect.left;
-                yOffset = initialY - rect.top;
-                
-                // Position the clone
-                updateClonePosition(touch.clientX, touch.clientY);
-                
-                // Hide original slightly
-                this.style.opacity = '0.4';
-                
-                // Reset all drop zone highlights
-                dropZones.forEach(zone => zone.classList.remove('highlight'));
-            }
-            
-            function touchMove(e) {
-                if (!currentDragItem || !dragItemClone) return;
-                
-                e.preventDefault();
-                
-                const touch = e.touches[0];
-                currentX = touch.clientX;
-                currentY = touch.clientY;
-                
-                // Update clone position
-                updateClonePosition(currentX, currentY);
-                
-                // Check if we're over a drop zone
-                const elemBelow = getElementBelowPoint(currentX, currentY);
-                
-                // Highlight drop zone if we're over one
+                // Highlight all drop zones to indicate they're available
                 dropZones.forEach(zone => {
-                    if (zone === elemBelow && zone.classList.contains('drop-zone')) {
+                    // Only highlight zones that don't already have an item
+                    if (!zone.querySelector('.matched-item')) {
                         zone.classList.add('highlight');
-                    } else {
-                        zone.classList.remove('highlight');
                     }
                 });
             }
             
-            function touchOver(e) {
-                if (!currentDragItem) return;
-                e.preventDefault();
-                
-                // This is called when touch moves over a drop zone
-                this.classList.add('highlight');
-            }
-            
-            function touchDrop(e) {
-                if (!currentDragItem) return;
-                e.preventDefault();
-                
-                this.classList.remove('highlight');
-                
-                const dragComponent = currentDragItem.dataset.component;
-                const targetComponent = this.dataset.target;
-                
-                handleDrop(this, currentDragItem, dragComponent, targetComponent);
-                
-                // Clean up
-                touchEnd(e);
-            }
-            
-            function touchEnd(e) {
-                if (!currentDragItem) return;
-                
-                // Clean up
-                currentDragItem.style.opacity = '';
-                
-                if (dragItemClone && dragItemClone.parentNode) {
-                    dragItemClone.parentNode.removeChild(dragItemClone);
+            // Function to handle placing an item in a drop zone
+            function placeItem(e) {
+                // If no item is selected or this zone already has an item, do nothing
+                if (!selectedItem || this.querySelector('.matched-item')) {
+                    return;
                 }
                 
-                // Reset all drop zone highlights
+                const dragComponent = selectedItem.getAttribute('data-component');
+                const targetComponent = this.getAttribute('data-target');
+                
+                // Remove highlight from all drop zones
                 dropZones.forEach(zone => zone.classList.remove('highlight'));
                 
-                currentDragItem = null;
-                dragItemClone = null;
-            }
-            
-            // Helper function to handle both mouse and touch drop events
-            function handleDrop(dropZone, dragItem, dragComponent, targetComponent) {
-                // Check if this is the correct drop zone
+                // Check if this is the correct match
                 if (targetComponent === dragComponent) {
-                    // Create a new drag item for the drop zone
-                    const newItem = dragItem.cloneNode(true);
-                    newItem.style.opacity = '1';
-                    newItem.style.cursor = 'default';
-                    newItem.setAttribute('draggable', 'false');
+                    // Create a new element to represent the matched item
+                    const matchedItem = document.createElement('div');
+                    matchedItem.className = 'matched-item';
+                    matchedItem.textContent = selectedItem.textContent;
+                    matchedItem.setAttribute('data-component', dragComponent);
                     
-                    // Clear any existing drag items in this zone
-                    const existingItems = dropZone.querySelectorAll('.drag-item');
-                    existingItems.forEach(item => item.remove());
+                    // Add to the drop zone
+                    this.appendChild(matchedItem);
+                    this.classList.add('correct');
                     
-                    // Add the new item to the drop zone
-                    dropZone.appendChild(newItem);
-                    dropZone.style.borderColor = 'green';
+                    // Mark the original item as placed
+                    selectedItem.classList.add('placed');
+                    selectedItem.classList.remove('selected');
                     
-                    // Mark the original as placed
-                    dragItem.dataset.placed = 'true';
-                    dragItem.style.display = 'none';
+                    // Reset selection
+                    selectedItem = null;
+                    
+                    // Provide success feedback
+                    if (navigator.vibrate) {
+                        navigator.vibrate([50, 50, 100]);
+                    }
                 } else {
-                    // Wrong match - visual feedback
-                    dropZone.style.borderColor = 'red';
+                    // Wrong match - show feedback
+                    this.classList.add('incorrect');
+                    selectedItem.classList.remove('selected');
+                    selectedItem = null;
+                    
+                    // Provide error feedback
+                    if (navigator.vibrate) {
+                        navigator.vibrate([100, 50, 100]);
+                    }
+                    
+                    // Remove incorrect indication after a short delay
                     setTimeout(() => {
-                        dropZone.style.borderColor = '#ddd';
+                        this.classList.remove('incorrect');
                     }, 1000);
                 }
             }
             
-            // Helper to update clone position
-            function updateClonePosition(x, y) {
-                if (dragItemClone) {
-                    dragItemClone.style.left = `${x - xOffset}px`;
-                    dragItemClone.style.top = `${y - yOffset}px`;
-                }
-            }
-            
-            // Helper to get element below a point
-            function getElementBelowPoint(x, y) {
-                dragItemClone.style.display = 'none'; // Temporarily hide clone
-                const element = document.elementFromPoint(x, y);
-                dragItemClone.style.display = ''; // Show clone again
-                return element;
-            }
-            
-            // Check Answers button for drag and drop
+            // Check Answers button for the matching exercise
             document.getElementById('check-drag-drop').addEventListener('click', () => {
                 let correct = 0;
                 const total = dropZones.length;
@@ -1462,13 +1392,16 @@
                 
                 dropZones.forEach(zone => {
                     const targetComponent = zone.getAttribute('data-target');
-                    const droppedItem = zone.querySelector(`.drag-item[data-component="${targetComponent}"]`);
+                    const matchedItem = zone.querySelector(`.matched-item[data-component="${targetComponent}"]`);
                     
-                    if (droppedItem) {
+                    if (matchedItem) {
                         correct++;
-                        zone.style.backgroundColor = 'rgba(39, 174, 96, 0.1)';
+                        zone.classList.add('correct');
                     } else {
-                        zone.style.backgroundColor = 'rgba(231, 76, 60, 0.1)';
+                        zone.classList.add('incorrect');
+                        setTimeout(() => {
+                            zone.classList.remove('incorrect');
+                        }, 1000);
                     }
                 });
                 
@@ -1486,7 +1419,11 @@
                 
                 // Display the result
                 document.getElementById('drag-drop-result').innerHTML = resultHTML;
+                
+                // Auto-scroll to result
+                document.getElementById('drag-drop-result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             });
+        });
         });
         
         
