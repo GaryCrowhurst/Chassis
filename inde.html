@@ -133,8 +133,8 @@
         }
         
         .option {
-            padding: 10px;
-            margin: 5px 0;
+            padding: 15px; /* Increased padding for better touch targets */
+            margin: 8px 0;
             background-color: #eee;
             border-radius: 5px;
             cursor: pointer;
@@ -181,7 +181,7 @@
             background-color: var(--secondary);
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 12px 20px; /* Increased padding for better touch targets */
             border-radius: 5px;
             cursor: pointer;
             font-size: 1rem;
@@ -230,8 +230,8 @@
         
         .hotspot {
             position: absolute;
-            width: 30px;
-            height: 30px;
+            width: 40px; /* Increased size for better touch targets */
+            height: 40px;
             background-color: rgba(243, 156, 18, 0.7);
             border-radius: 50%;
             cursor: pointer;
@@ -252,7 +252,7 @@
             display: none;
             position: absolute;
             width: 200px;
-            padding: 10px;
+            padding: 15px;
             background-color: white;
             border: 1px solid #ddd;
             border-radius: 5px;
@@ -261,20 +261,37 @@
         }
         
         .drag-item {
-            padding: 10px;
-            margin: 5px;
+            padding: 15px; /* Increased padding for better touch targets */
+            margin: 8px;
             background-color: var(--secondary);
             color: white;
             border-radius: 5px;
             cursor: grab;
             user-select: none;
             display: inline-block;
+            touch-action: none; /* Prevent browser handling of touch events */
+        }
+        
+        .drag-item.dragging {
+            opacity: 0.6;
+        }
+        
+        .drag-item.touch-dragging {
+            position: absolute;
+            z-index: 1000;
+            opacity: 0.8;
+            pointer-events: none;
+        }
+        
+        .drag-items {
+            margin-bottom: 20px;
+            position: relative; /* Needed for absolute positioning during touch drag */
         }
         
         .drop-zone {
             padding: 15px;
             margin: 10px 0;
-            min-height: 50px;
+            min-height: 60px; /* Increased height for better touch targets */
             border: 2px dashed #ddd;
             border-radius: 5px;
             transition: background-color 0.3s;
@@ -374,17 +391,72 @@
             margin-top: 30px;
         }
         
+        /* Enhanced Mobile Styling */
         @media (max-width: 768px) {
             .tabs {
                 flex-direction: column;
+                align-items: center;
             }
             
             .tab-link {
                 margin: 5px 0;
+                width: 80%;
+                text-align: center;
             }
             
             .info-box {
-                width: 150px;
+                width: 180px;
+                left: 50% !important;
+                transform: translateX(-50%);
+                top: 120% !important; /* Position below the hotspot */
+            }
+            
+            header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .drag-items {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .drag-item {
+                margin: 5px;
+                flex: 0 0 45%;
+                text-align: center;
+            }
+            
+            .option {
+                padding: 15px 10px;
+            }
+            
+            .question p {
+                font-size: 1rem;
+            }
+            
+            .flashcard-nav {
+                flex-wrap: wrap;
+            }
+            
+            .flashcard-nav button {
+                margin: 5px;
+                flex: 1 0 30%;
+            }
+        }
+        
+        /* Extra small devices */
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .content-section {
+                padding: 15px;
+            }
+            
+            .drag-item {
+                flex: 0 0 100%;
             }
         }
     </style>
@@ -448,7 +520,7 @@
             <p>Steering systems convert the rotational movement of the steering wheel into the angular movement of the road wheels, allowing the driver to control the vehicle's direction.</p>
             
             <div class="diagram-container">
-                <img src="Steering-System.jpg" alt="Steering System Diagram" class="diagram-image">
+                <img src="/api/placeholder/800/500" alt="Steering System Diagram" class="diagram-image">
                 <div class="hotspot" style="top: 50%; left: 30%;" data-info="rack">1</div>
                 <div class="hotspot" style="top: 30%; left: 60%;" data-info="tierod">2</div>
                 <div class="hotspot" style="top: 40%; left: 45%;" data-info="steering-column">3</div>
@@ -554,7 +626,7 @@
             <p>A solid beam connects the left and right wheels, causing movement of one wheel to affect the other. Often used on rear suspensions of trucks and some rear-wheel-drive vehicles.</p>
             
             <div class="diagram-container">
-                <img src="suspension_systems.jpg" alt="Suspension Systems" class="diagram-image">
+                <img src="/api/placeholder/800/500" alt="Suspension Systems" class="diagram-image">
             </div>
             
             <h3>Suspension Components</h3>
@@ -643,7 +715,7 @@
             </ul>
             
             <div class="diagram-container">
-                <img src="braking_systems.jpg" alt="Braking Systems" class="diagram-image">
+                <img src="/api/placeholder/800/500" alt="Braking Systems" class="diagram-image">
             </div>
             
             <h3>Hydraulic System Components</h3>
@@ -747,7 +819,7 @@
             </ul>
             
             <div class="diagram-container">
-                <img src="tyre_markings" alt="Tyre Markings" class="diagram-image">
+                <img src="/api/placeholder/800/500" alt="Tyre Markings" class="diagram-image">
             </div>
             
             <h4>Understanding Tyre Markings:</h4>
@@ -988,27 +1060,58 @@
             document.querySelector('.tab-link[data-tab="steering"]').click();
         });
         
-        // Hotspot functionality
+        // Hotspot functionality for both mouse and touch
         const hotspots = document.querySelectorAll('.hotspot');
         
         hotspots.forEach(hotspot => {
             const infoType = hotspot.getAttribute('data-info');
             const infoBox = document.getElementById(`${infoType}-info`);
             
-            hotspot.addEventListener('mouseenter', () => {
-                // Position info box near hotspot
-                const hotspotRect = hotspot.getBoundingClientRect();
-                const containerRect = hotspot.parentElement.getBoundingClientRect();
-                
-                infoBox.style.left = `${hotspotRect.left - containerRect.left + 30}px`;
-                infoBox.style.top = `${hotspotRect.top - containerRect.top}px`;
-                infoBox.style.display = 'block';
+            // Mouse events
+            hotspot.addEventListener('mouseenter', (e) => {
+                showInfoBox(e, hotspot, infoBox);
             });
             
             hotspot.addEventListener('mouseleave', () => {
                 infoBox.style.display = 'none';
             });
+            
+            // Touch events
+            hotspot.addEventListener('touchstart', (e) => {
+                e.preventDefault(); // Prevent default touch behavior
+                
+                // Close any other open info boxes
+                document.querySelectorAll('.info-box').forEach(box => {
+                    if (box !== infoBox) {
+                        box.style.display = 'none';
+                    }
+                });
+                
+                // Toggle this info box
+                if (infoBox.style.display === 'block') {
+                    infoBox.style.display = 'none';
+                } else {
+                    showInfoBox(e, hotspot, infoBox);
+                }
+            });
         });
+        
+        function showInfoBox(e, hotspot, infoBox) {
+            // Position info box near hotspot
+            const hotspotRect = hotspot.getBoundingClientRect();
+            const containerRect = hotspot.parentElement.getBoundingClientRect();
+            
+            // Check if we're on mobile (smaller screens)
+            if (window.innerWidth <= 768) {
+                infoBox.style.left = '50%';
+                infoBox.style.top = '120%'; 
+            } else {
+                infoBox.style.left = `${hotspotRect.left - containerRect.left + 30}px`;
+                infoBox.style.top = `${hotspotRect.top - containerRect.top}px`;
+            }
+            
+            infoBox.style.display = 'block';
+        }
         
         // Quiz functionality
         const quizButtons = document.querySelectorAll('#check-steering-quiz, #check-suspension-quiz, #check-brakes-quiz, #check-wheels-quiz, #check-brake-sim');
@@ -1057,22 +1160,53 @@
             });
         });
         
-        // Option selection
+        // Option selection - enhanced for better touch support
         document.querySelectorAll('.option').forEach(option => {
-            option.addEventListener('click', () => {
-                const allOptions = option.parentElement.querySelectorAll('.option');
-                allOptions.forEach(opt => opt.classList.remove('selected'));
-                option.classList.add('selected');
+            ['click', 'touchend'].forEach(eventType => {
+                option.addEventListener(eventType, (e) => {
+                    if (eventType === 'touchend') {
+                        e.preventDefault(); // Prevent default touch behavior that might interfere
+                    }
+                    
+                    const allOptions = option.parentElement.querySelectorAll('.option');
+                    allOptions.forEach(opt => opt.classList.remove('selected'));
+                    option.classList.add('selected');
+                });
             });
         });
         
-        // Drag and Drop functionality
+        // Enhanced Drag and Drop functionality with touch support
         const dragItems = document.querySelectorAll('.drag-item');
         const dropZones = document.querySelectorAll('.drop-zone');
+        let currentDraggedItem = null;
+        let touchActive = false;
+        let touchOffsetX = 0;
+        let touchOffsetY = 0;
+        let lastTouchX = 0;
+        let lastTouchY = 0;
+        let ghostElement = null;
         
+        // Create a ghost element for touch dragging
+        function createGhostElement(element) {
+            const ghost = element.cloneNode(true);
+            ghost.classList.add('touch-dragging');
+            document.body.appendChild(ghost);
+            return ghost;
+        }
+        
+        function removeGhostElement() {
+            if (ghostElement && ghostElement.parentNode) {
+                ghostElement.parentNode.removeChild(ghostElement);
+                ghostElement = null;
+            }
+        }
+        
+        // Traditional drag and drop for desktop
         dragItems.forEach(item => {
+            // Desktop drag events
             item.addEventListener('dragstart', (e) => {
                 e.dataTransfer.setData('text/plain', item.getAttribute('data-component'));
+                currentDraggedItem = item;
                 setTimeout(() => {
                     item.classList.add('dragging');
                 }, 0);
@@ -1080,9 +1214,125 @@
             
             item.addEventListener('dragend', () => {
                 item.classList.remove('dragging');
+                currentDraggedItem = null;
+            });
+            
+            // Touch events for mobile
+            item.addEventListener('touchstart', (e) => {
+                touchActive = true;
+                currentDraggedItem = item;
+                
+                // Calculate touch offset (where on the element the user touched)
+                const touch = e.touches[0];
+                const rect = item.getBoundingClientRect();
+                touchOffsetX = touch.clientX - rect.left;
+                touchOffsetY = touch.clientY - rect.top;
+                lastTouchX = touch.clientX;
+                lastTouchY = touch.clientY;
+                
+                // Create ghost element for dragging
+                ghostElement = createGhostElement(item);
+                updateGhostPosition(touch.clientX, touch.clientY);
+                
+                item.classList.add('dragging');
+                e.preventDefault(); // Prevent scrolling while dragging
+            });
+            
+            item.addEventListener('touchmove', (e) => {
+                if (!touchActive) return;
+                
+                const touch = e.touches[0];
+                lastTouchX = touch.clientX;
+                lastTouchY = touch.clientY;
+                
+                updateGhostPosition(touch.clientX, touch.clientY);
+                
+                // Find the drop zone under the touch point
+                const dropZoneUnder = getDropZoneUnderPoint(touch.clientX, touch.clientY);
+                
+                // Highlight the drop zone if found
+                dropZones.forEach(zone => {
+                    if (zone === dropZoneUnder) {
+                        zone.classList.add('highlight');
+                    } else {
+                        zone.classList.remove('highlight');
+                    }
+                });
+                
+                e.preventDefault(); // Prevent scrolling while dragging
+            });
+            
+            item.addEventListener('touchend', (e) => {
+                if (!touchActive) return;
+                
+                const dropZoneUnder = getDropZoneUnderPoint(lastTouchX, lastTouchY);
+                
+                if (dropZoneUnder) {
+                    const componentId = currentDraggedItem.getAttribute('data-component');
+                    
+                    // Check if this is the correct drop zone
+                    if (dropZoneUnder.getAttribute('data-target') === componentId) {
+                        dropZoneUnder.innerHTML = `<p>${dropZoneUnder.querySelector('p').textContent}</p>`;
+                        dropZoneUnder.appendChild(currentDraggedItem.cloneNode(true));
+                        dropZoneUnder.style.borderColor = 'green';
+                        currentDraggedItem.style.display = 'none';
+                    } else {
+                        dropZoneUnder.style.borderColor = 'red';
+                        setTimeout(() => {
+                            dropZoneUnder.style.borderColor = '#ddd';
+                        }, 1000);
+                    }
+                }
+                
+                // Reset all highlight states
+                dropZones.forEach(zone => {
+                    zone.classList.remove('highlight');
+                });
+                
+                item.classList.remove('dragging');
+                touchActive = false;
+                currentDraggedItem = null;
+                removeGhostElement();
+                
+                e.preventDefault();
             });
         });
         
+        function updateGhostPosition(x, y) {
+            if (ghostElement) {
+                ghostElement.style.left = (x - touchOffsetX) + 'px';
+                ghostElement.style.top = (y - touchOffsetY) + 'px';
+            }
+        }
+        
+        function getDropZoneUnderPoint(x, y) {
+            for (let i = 0; i < dropZones.length; i++) {
+                const rect = dropZones[i].getBoundingClientRect();
+                if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+                    return dropZones[i];
+                }
+            }
+            return null;
+        }
+        
+        // Cancel touch drag when touching outside
+        document.addEventListener('touchstart', (e) => {
+            if (touchActive && !e.target.closest('.drag-item') && !e.target.closest('.drop-zone')) {
+                dropZones.forEach(zone => {
+                    zone.classList.remove('highlight');
+                });
+                
+                if (currentDraggedItem) {
+                    currentDraggedItem.classList.remove('dragging');
+                }
+                
+                touchActive = false;
+                currentDraggedItem = null;
+                removeGhostElement();
+            }
+        });
+        
+        // Desktop drop events
         dropZones.forEach(zone => {
             zone.addEventListener('dragover', (e) => {
                 e.preventDefault();
@@ -1151,7 +1401,7 @@
             scoreDisplay.classList.add('drag-drop-score');
         });
         
-        // Flashcard functionality
+        // Flashcard functionality - enhanced for touch support
         const flashcards = document.querySelectorAll('.flashcard');
         const steeringTerms = [
             {
@@ -1213,34 +1463,103 @@
         updateFlashcard('steering');
         updateFlashcard('tyre');
         
-        // Flashcard button events
-        document.getElementById('flip-card').addEventListener('click', () => {
-            document.getElementById('flashcard-1').classList.toggle('flipped');
-        });
+        // Flashcard button events - with touch support
+        function setupFlashcardEvents(flipBtn, prevBtn, nextBtn, flashcardId, currentIndexVar, terms, type) {
+            // Flip card - both click and touch
+            flipBtn.addEventListener('click', () => {
+                document.getElementById(flashcardId).classList.toggle('flipped');
+            });
+            
+            // Direct touch on flashcard to flip
+            document.getElementById(flashcardId).addEventListener('touchend', (e) => {
+                if (e.target.closest('.flashcard-inner')) {
+                    e.preventDefault();
+                    document.getElementById(flashcardId).classList.toggle('flipped');
+                }
+            });
+            
+            // Next and previous
+            nextBtn.addEventListener('click', () => {
+                if (type === 'steering') {
+                    currentSteeringCard = (currentSteeringCard + 1) % terms.length;
+                    updateFlashcard('steering');
+                } else {
+                    currentTyreCard = (currentTyreCard + 1) % terms.length;
+                    updateFlashcard('tyre');
+                }
+            });
+            
+            prevBtn.addEventListener('click', () => {
+                if (type === 'steering') {
+                    currentSteeringCard = (currentSteeringCard - 1 + terms.length) % terms.length;
+                    updateFlashcard('steering');
+                } else {
+                    currentTyreCard = (currentTyreCard - 1 + terms.length) % terms.length;
+                    updateFlashcard('tyre');
+                }
+            });
+            
+            // Swipe left/right for next/previous
+            let touchStartX = 0;
+            let touchEndX = 0;
+            
+            document.getElementById(flashcardId).addEventListener('touchstart', (e) => {
+                touchStartX = e.touches[0].clientX;
+            });
+            
+            document.getElementById(flashcardId).addEventListener('touchend', (e) => {
+                touchEndX = e.changedTouches[0].clientX;
+                handleFlashcardSwipe(type);
+            });
+            
+            function handleFlashcardSwipe(type) {
+                const minSwipeDistance = 50;
+                const swipeDistance = touchEndX - touchStartX;
+                
+                if (Math.abs(swipeDistance) > minSwipeDistance) {
+                    if (swipeDistance > 0) {
+                        // Swipe right (previous)
+                        if (type === 'steering') {
+                            currentSteeringCard = (currentSteeringCard - 1 + steeringTerms.length) % steeringTerms.length;
+                            updateFlashcard('steering');
+                        } else {
+                            currentTyreCard = (currentTyreCard - 1 + tyreTerms.length) % tyreTerms.length;
+                            updateFlashcard('tyre');
+                        }
+                    } else {
+                        // Swipe left (next)
+                        if (type === 'steering') {
+                            currentSteeringCard = (currentSteeringCard + 1) % steeringTerms.length;
+                            updateFlashcard('steering');
+                        } else {
+                            currentTyreCard = (currentTyreCard + 1) % tyreTerms.length;
+                            updateFlashcard('tyre');
+                        }
+                    }
+                }
+            }
+        }
         
-        document.getElementById('next-card').addEventListener('click', () => {
-            currentSteeringCard = (currentSteeringCard + 1) % steeringTerms.length;
-            updateFlashcard('steering');
-        });
+        // Set up flashcard events
+        setupFlashcardEvents(
+            document.getElementById('flip-card'),
+            document.getElementById('prev-card'),
+            document.getElementById('next-card'),
+            'flashcard-1',
+            currentSteeringCard,
+            steeringTerms,
+            'steering'
+        );
         
-        document.getElementById('prev-card').addEventListener('click', () => {
-            currentSteeringCard = (currentSteeringCard - 1 + steeringTerms.length) % steeringTerms.length;
-            updateFlashcard('steering');
-        });
-        
-        document.getElementById('tyre-flip-card').addEventListener('click', () => {
-            document.getElementById('tyre-flashcard-1').classList.toggle('flipped');
-        });
-        
-        document.getElementById('tyre-next-card').addEventListener('click', () => {
-            currentTyreCard = (currentTyreCard + 1) % tyreTerms.length;
-            updateFlashcard('tyre');
-        });
-        
-        document.getElementById('tyre-prev-card').addEventListener('click', () => {
-            currentTyreCard = (currentTyreCard - 1 + tyreTerms.length) % tyreTerms.length;
-            updateFlashcard('tyre');
-        });
+        setupFlashcardEvents(
+            document.getElementById('tyre-flip-card'),
+            document.getElementById('tyre-prev-card'),
+            document.getElementById('tyre-next-card'),
+            'tyre-flashcard-1',
+            currentTyreCard,
+            tyreTerms,
+            'tyre'
+        );
         
         // Mock Exam
         document.getElementById('check-exam').addEventListener('click', () => {
@@ -1305,6 +1624,11 @@
                     </div>
                 `;
                 resultElement.style.display = 'block';
+                
+                // Scroll to results
+                setTimeout(() => {
+                    resultElement.scrollIntoView({ behavior: 'smooth' });
+                }, 500);
             }
         });
     </script>
